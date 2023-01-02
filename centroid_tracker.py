@@ -2,38 +2,48 @@ from scipy.spatial import distance as dist
 from collections import OrderedDict
 import numpy as np
 
+# TODO: read article that centroid tracker code is based on:
+#  https://www.pyimagesearch.com/2018/07/23/simple-object-tracking-with-opencv/
+#  Also read about opencv inbuilt trackers - https://www.pyimagesearch.com/2018/07/30/opencv-object-tracking/
 
 class CentroidTracker:
     def __init__(self, maxDisappeared=50):
         # initialize unique object ID
         self.nextObjectID = 0
 
-        # initialize three ordered dictionaries:
-        #   1. Key = objectID, Val = centroid coordinates
-        #   2. Key = objectID, Val = number of consecutive frames this objectID has been marked "disappeared"
-        #   3. Key = objectID, Val = coordinates of that objects bounding box (x, y, w, h)
+        # TODO: Might be worth just creating an object class
+        #  with an objectID and objectTracker field to clarify the code
+        #  reread this comment once you're more familiar with code
         self.objects = OrderedDict()
         self.disappeared = OrderedDict()
+        # TODO: check whether we actually need self.bbox,
+        #  I'm pretty sure tracker object has bounding box attribute
         self.bbox = OrderedDict()
 
         # store the number of frames an object can be marked "disappeared" before it is deregistered
         self.maxDisappeared = maxDisappeared
 
     # registering a new object using next available ID to store its centroid
+    # TODO: dont need centroid as input variable
     def register(self, centroid, bbox):
         self.nextObjectID += 1
-        self.objects[self.nextObjectID] = centroid
+        # TODO: Instantiate tracker object at the bbox
+        # TODO: Set self.objects[self.nextObjectID] = tracker object
+        self.objects[self.nextObjectID] = centroid  # remove once using opencv tracker
         self.disappeared[self.nextObjectID] = 0
         self.bbox[self.nextObjectID] = bbox
 
     # de-registering an object by deleting object ID from both dictionaries
     def deregister(self, objectID):
+        # TODO: Check if this is the right way to remove a tracker object
         del self.objects[objectID]
         del self.disappeared[objectID]
         del self.bbox[objectID]
 
     # update state every frame
-    def update(self, boxes):
+    def update(self, frame, boxes):
+        # TODO: for tracker in dictionary of trackers
+        #  update tracker
         # if no current bounding boxes, de-register any object past limit and return early
         if len(boxes) == 0:
             for objectID in list(self.disappeared.keys()):
@@ -54,6 +64,7 @@ class CentroidTracker:
             inputRects.append(boxes[i])
 
         # if currently not tracking any objects, register the centroids
+        # TODO: dont need centroid as input variable
         if len(self.objects) == 0:
             for i in range(0, len(inputCentroids)):
                 self.register(inputCentroids[i], inputRects[i])
@@ -65,6 +76,9 @@ class CentroidTracker:
 
             # compute distance between each pair of object centroids and input centroids
             D = dist.cdist(np.array(objectCentroids), inputCentroids)
+
+            # TODO: Not immediate concern, but maybe bipartite matching instead of this?
+            #  Not important, do this last
 
             # find smallest value in each row, sort row indexes by minimum values
             rows = D.min(axis=1).argsort()
@@ -103,6 +117,7 @@ class CentroidTracker:
 
             # in the event that there are more input centroids than object centroids
             else:
+                # TODO: dont need centroid as input variable
                 for col in unusedCols:
                     self.register(inputCentroids[col], inputRects[col])
 
