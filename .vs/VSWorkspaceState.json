@@ -1,6 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\PyRoboteq",
+    "\\PyRoboteq\\examples"
   ],
+  "SelectedNode": "\\motor_controller.py",
   "PreviewInSolutionExplorer": false
 }
