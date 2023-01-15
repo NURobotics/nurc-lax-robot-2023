@@ -23,7 +23,10 @@ if __name__ == "__main__":
         
         controller.send_command(cmds.DUAL_DRIVE, drive_speed, drive_speed)
         battery_amps = controller.read_value(cmds.READ_BATTERY_AMPS, 1) # Read value 1 of battery amps
-        print(battery_amps)
+        abscntr      = controller.read_value(cmds.READ_ABSCNTR, 1)      # Read encoder counter absolute
+
+        print(f"Battery amps: {battery_amps}")
+        print(f"Encoder count: {abscntr}") #extra thing added by Sean
             
             
 

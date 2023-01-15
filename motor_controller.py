@@ -1,7 +1,49 @@
 
-from PyRoboteq import roboteq_handler
+from PyRoboteq.roboteq_handler import RoboteqHandler
 from PyRoboteq import roboteq_commands as cmds
 
+class Controller(RoboteqHandler):
+    '''A simple structure to describe the motor controller at a higher level
+    than the base capabilities of class RoboteqHandler.
+
+    This class includes:
+    - Member data describing current params being read from the Roboteq
+    - Functions to handle PID control
+    - Functions to convert from real-world space to motor space
+    '''
+
+    def __init__(self, exit_on_interrupt = False, debug_mode = False):
+        super().__init__(exit_on_interrupt, debug_mode)
+
+    def read_curr_state(self):
+        '''Read all relevant values from the Roboteq at once. Depending on baud rate,
+        this may be a time-consuming operation - check later to see if it needs to be 
+        optimized.
+
+        Structure of read_value:  command: str = "", parameter = "" (parameter is usually 1 for first value)
+
+        Returns: none; edits member data
+        '''
+        self.motor_amps   = self.read_value(cmds.READ_MOTOR_AMPS,1)    # Read current motor amperage
+        self.battery_amps = self.read_value(cmds.READ_BATTERY_AMPS,1)  # Read battery amps
+        self.bl_motor_rpm = self.read_value(cmds.READ_BL_MOTOR_RPM, 1) # Read brushless motor speed in RPM
+        self.blrspeed     = self.read_value(cmds.READ_BLRSPEED, 1)     # Read brushless motor speed as 1/100 of max RPM
+        self.abscntr      = self.read_value(cmds.READ_ABSCNTR, 1)      # Read encoder counter absolute
+        self.blcntr       = self.read_value(cmds.READ_BLCNTR, 1)       # Read absolute brushless counter
+        self.peak_amps    = self.read_value(cmds.READ_PEAK_AMPS, 1)    # Read DC/Peak Amps
+        self.dreached     = self.read_value(cmds.READ_DREACHED, 1)     # R4ead destination reached
+        self.fltflag      = self.read_value(cmds.READ_FLTFLAG, 1)      # Read fault flags
+        self.motcmd       = self.read_value(cmds.READ_MOTCMD, 1)       # Read motor command applied
+        self.temp         = self.read_value(cmds.READ_TEMP, 1)         # Read controller temperature
+        self.volts        = self.read_value(cmds.READ_VOLTS, 1)        # Read voltage measured
+
+        
+def set_pid_params():
+    pass
+
+def set_kinematics_params():
+    #accel, decel, max velocity, rpms at max speed
+    pass
 
 def convert_worldspace_to_motor_rot(coord):
     '''Takes a position in the real world, and converts it to necessary
@@ -25,34 +67,8 @@ def convert_worldspace_to_motor_rot(coord):
 
     return (delta_m1, delta_m2)
 
-def read_motor_controller_vals():
-    #consider making a struct that contains all the important params, and updating every n cycles
-    #by reading from motor controller
-    pass
 
-    '''
-    Motor commands of interest:
-    READ_MOTOR_AMPS = "?A" # Read current motor amperage
-    READ_BATTERY_AMPS = "?BA" # Read battery amps
-    READ_BL_MOTOR_RPM = "?BS" # Read brushless motor speed in RPM
-    READ_BLRSPEED = "?BSR" # Read brushless motor speed as 1/100 of max RPM
-    READ_ABSCNTR = "?C" # Read encoder counter absolute
-    READ_BLCNTR = "?CB" # Read absolute brushless counter
-    READ_PEAK_AMPS = "?DPA" # Read DC/Peak Amps
-    READ_DREACHED = "?DR" # Read destination reached
-    READ_FLTFLAG = "?FF" # Read fault flags
-    READ_MOTCMD = "?M" # Read motor command applied
-    READ_TEMP = "?T" # Read controller temperature
-    READ_VOLTS = "?V" # Read voltage measured
-    '''
 
-def gen_array_speed_cmds():
-    #check if position can be controller by roboteq before doing this
-    pass
-
-def set_pid_params():
-    pass
-
-def set_kinematics_params():
-    #accel, decel, max velocity, rpms at max speed
-    pass
+#def gen_array_speed_cmds():
+#    #check if position can be controlled by roboteq before doing this
+#    pass

@@ -82,3 +82,32 @@ RESET = "%RESET" # Reset controller, insert safetykey
 SLD = "%SLD" # script load
 STIME = "%STIME" # Set controller time
 UK = "%UK" # unlock configuration acces, include your safety key (32-bit number)
+
+
+#extra commands - added by Sean
+
+'''these follow the same format as the commands above, but use the extended
+library of Roboteq commands featured in the C++ code
+'''
+
+#action commands
+ICAP = "!ICAP" #integrator cap; to prevent windup
+KP = "!KP" #PID prop. gain
+KI = "!KI" #PID integral gain
+KD = "!KD" #PID deriv. gain
+
+KPC1 = "!KPC1" #KP curve points for motor 1
+KPC2 = "!KPC2" #KP curve points for motor 2
+KIC1 = "!KIC1" #KI curve points for motor 1
+KIC2 = "!KIC2" #KI curve points for motor 2
+KDC1 = "!KDC1" #KD curve points for motor 1
+KDC2 = "!KDC2" #KD curve points for motor 2
+
+
+#set mode as closed-loop?
+
+#_PIDM seems promising in the table
+#seems like 
+
+#runtime queries
+
