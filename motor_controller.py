@@ -38,8 +38,11 @@ class Controller(RoboteqHandler):
         self.volts        = self.read_value(cmds.READ_VOLTS, 1)        # Read voltage measured
 
         
-def set_pid_params():
-    pass
+def set_pid_params(kp, ki, kd):
+    '''Sets gains for PID control all at once.'''
+    controller.send_command(cmds.KP, kp)
+    controller.send_command(cmds.KI, ki)
+    controller.send_command(cmds.KD, kd)
 
 def set_kinematics_params():
     #accel, decel, max velocity, rpms at max speed
