@@ -2,6 +2,7 @@
 *.avi
 *.weights
 yolo-balls/*
-.vs/VSWorkspaceState.json
-.vs/slnx.sqlite
-.vs/LAX_2023/v16/.suo
+.vs/*
+python_gui/.vs/*
+python_gui/code/.vs/*
+*.pyc

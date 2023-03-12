@@ -1,0 +1,13 @@
+#this code has been tested in a virtual Conda environment, as well
+#as this requirements.txt file, and worked on my PC
+numpy>=1.23.3
+sympy>=1.11.1
+pandas>=1.4.4
+matplotlib>=3.6.0
+
+tqdm>=4.64.1
+dill>=0.3.6
+#tkinter
+pillow>=9.2.0
+
+IPython>=8.5.0
