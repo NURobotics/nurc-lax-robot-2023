@@ -2,7 +2,6 @@
 from PyRoboteq import RoboteqHandler
 from PyRoboteq import roboteq_commands as cmds
 
-
 #sample roboteq commands
 controller = RoboteqHandler(debug_mode = True, exit_on_interrupt = False)  # Create the controller object
 is_connected = controller.connect("COM3") # connect to the controller (COM9 is an example for windows)
