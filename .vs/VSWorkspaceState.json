@@ -1,9 +1,13 @@
 {
   "ExpandedNodes": [
     "",
+    "\\motor_control",
+    "\\motor_control\\PyRoboteq",
     "\\PyRoboteq",
-    "\\PyRoboteq\\examples"
+    "\\PyRoboteq\\examples",
+    "\\python_gui",
+    "\\python_gui\\code"
   ],
-  "SelectedNode": "\\centroid_tracker.py",
+  "SelectedNode": "\\motor_control\\motor_control_gui.py",
   "PreviewInSolutionExplorer": false
 }

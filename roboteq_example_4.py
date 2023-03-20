@@ -7,7 +7,7 @@ import keyboard
 #extra file I designed to track along a given position
 
 controller = RoboteqHandler()
-connected = controller.connect("COM3")
+connected = controller.connect("COM4")
 
 if __name__ == "__main__":
     drive_speed = 0

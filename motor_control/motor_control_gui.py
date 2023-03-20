@@ -1,19 +1,30 @@
-from PyRoboteq import RoboteqHandler
+#from PyRoboteq import RoboteqHandler
+from motor_controller import Controller
 from PyRoboteq import roboteq_commands as cmds
+import keyboard
+import time
 
 DRIVE_SPEED = 100
 DWELL = 0.5 #time between commands
 has_quit = False
-enc_count = None
+estop_active = False #TODO: this may not necessarily be the case on startup; use FM to check status
+
+abscntr_1 = None
+abscntr_2 = None
 
 menu_text = \
-	'\tROBOTEQ MOTOR DRIVER INTERFACE \n' + \
-	'\tWASD keys: move up/down/left/right \n' + \
-	'\te: read encoder position (counts) \th: set current posn as home \n' + \
-	'\tq: quit client \tc: ESTOP'
+	'ROBOTEQ MOTOR DRIVER INTERFACE \n' + \
+	'WASD keys: move up/down/left/right \n' + \
+	'e: read encoder counts \tf: read world coords  \th: set current posn as home \n' + \
+	'q: quit client \tc: ESTOP \tx: RELEASE ESTOP'
 
-controller = RoboteqHandler(debug_mode = True, exit_on_interrupt = False)  # Create the controller object
-is_connected = controller.connect("COM3") # connect to the controller (COM9 is an example for windows)
+def menu():
+	print(menu_text)
+	if estop_active:
+		print("Estop is active")
+
+controller = Controller(debug_mode = False, exit_on_interrupt = False)  # Create the controller object
+is_connected = controller.connect("COM4") # connect to the controller (COM9 for windows, /dev/tty/something for Linux)
 
 #-----------------------------#
 
@@ -21,30 +32,10 @@ if (not is_connected):
     raise Exception("Error in connection")
 
 # menu loop
+menu()
 while not has_quit:
 
-	## display the menu options; this list will grow
-	#print('\tb: read current (mA) \tc: read encoder (counts) \td: read encoder (deg)')
-	#print('\te: reset encoder \tf: set PWM, -100 to 100 \tg: set current gains')
-	#print('\th: get current gains \ti: set position gains \t\tj: get position gains')
-	#print('\tk: test current gains \tl: go to position \t\tm: load step traj.')
-	#print('\tn: load cubic traj. \to: execute traj. \t\tp: power off PWM')
-	#print('\t' + '_' * 90)
-	#print('\tq: quit \t\tr: read PIC32 mode \t\ty: view traj. arrays\n')
-
 	#ser.flush()
-
-	## read the user's choice
-	#selection = input('ENTER COMMAND: ')
-	#selection_endline = selection+'\n'
-	 
-	## send the command to the PIC32
-	#ser.write(selection_endline.encode()); # .encode() turns the string into a char array
-
-	# take the appropriate action
-	# there is no switch() in python, using if elif instead
-
-
 	#Menuing: use keyboard.is_pressed() to detect instant input
 
 	if keyboard.is_pressed('w'):
@@ -52,7 +43,7 @@ while not has_quit:
 		#send commands to move up
 		while keyboard.is_pressed('w'):
 			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, -DRIVE_SPEED, DRIVE_SPEED)
+			controller.send_command(cmds.DUAL_DRIVE, -DRIVE_SPEED, -DRIVE_SPEED)
 
 		controller.send_command(cmds.DUAL_DRIVE, 0, 0)   
 
@@ -63,7 +54,7 @@ while not has_quit:
 		#send commands to move down
 		while keyboard.is_pressed('s'):
 			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, DRIVE_SPEED, -DRIVE_SPEED)
+			controller.send_command(cmds.DUAL_DRIVE, DRIVE_SPEED, DRIVE_SPEED)
 
 		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
 
@@ -74,7 +65,7 @@ while not has_quit:
 		#send commands to move left
 		while keyboard.is_pressed('a'):
 			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, DRIVE_SPEED, DRIVE_SPEED)
+			controller.send_command(cmds.DUAL_DRIVE, -DRIVE_SPEED, DRIVE_SPEED)
 
 		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
 
@@ -85,7 +76,7 @@ while not has_quit:
 		#send commands to move right
 		while keyboard.is_pressed('d'):
 			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, -DRIVE_SPEED, -DRIVE_SPEED)
+			controller.send_command(cmds.DUAL_DRIVE, DRIVE_SPEED, -DRIVE_SPEED)
 
 		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
 
@@ -93,8 +84,8 @@ while not has_quit:
 
 	elif keyboard.is_pressed('q'):
 
-		print('Exiting client')
-		has_quit = True; # exit client
+		print('\nExiting client\n\n')
+		has_quit = True # exit client
 		# be sure to close the port
 		#ser.close() 
 
@@ -102,183 +93,162 @@ while not has_quit:
 
 	elif keyboard.is_pressed('c'):
 
-		print('Hitting emergency stop')
+		print('\nHitting emergency stop \n\n')
 		controller.send_command(cmds.EM_STOP) # this will send 0 argument command for emergency stop
-		has_quit = True; # exit client
+		estop_active = True
+		#has_quit = True; # exit client
+		time.sleep(DWELL)
+		menu()
+
+	elif keyboard.is_pressed('x'):
+
+		print('\nReleasing emergency stop \n\n')
+		controller.send_command(cmds.REL_EM_STOP)
+		estop_active = False
+
+		time.sleep(DWELL)
+		menu()
 
 	###
 
 	elif keyboard.is_pressed('e'):
 
-		#controller.send_command(cmds.EM_STOP) # this will send 0 argument command for emergency stop
-		enc_count = controller.read_value(cmds.READ_ABSCNTR, 1)
-		print(f"Current encoder count: {enc_count}")
+		abscntr_1      = (controller.read_value(cmds.READ_ABSCNTR, 1))      # Read encoder counter absolute
+		abscntr_2      = (controller.read_value(cmds.READ_ABSCNTR, 2))      # Read encoder counter absolute
+		abscntr_1 = int(abscntr_1.split('=')[-1])
+		abscntr_2 = int(abscntr_2.split('=')[-1])
+
+		print(f"\nEncoder counts: \nENC1: {abscntr_1} \nENC2: {abscntr_2} \n\n")
 		time.sleep(DWELL)
-		print(menu_text)
+		menu()
+
+	###
+
+	elif keyboard.is_pressed('f'):
+
+		abscntr_1      = (controller.read_value(cmds.READ_ABSCNTR, 1))      # Read encoder counter absolute
+		abscntr_2      = (controller.read_value(cmds.READ_ABSCNTR, 2))      # Read encoder counter absolute
+		abscntr_1 = int(abscntr_1.split('=')[-1])
+		abscntr_2 = int(abscntr_2.split('=')[-1])
+		
+		(x, y) = controller.convert_enc_counts_to_posn(abscntr_1, abscntr_2)
+		print(f"\nWorld coords: ({x},{y}) \n\n")
+
+		time.sleep(DWELL)
+		menu()
+
 
 	###
 
 	elif keyboard.is_pressed('h'):
 		
-		if not enc_count:
-			print("We need to set an encoder position first.")
-		else:
-			print("Setting current position as home position: {enc_count}")
-			controller.send_command(cmds.HOME_COUNTER, enc_count)
+		print("\nSetting current position as home position: \n\n")
+
+		#TODO: Check mode, see if it's closed-loop. Change mode to open-loop,
+			#set the posn, and if putting it back into closed-loop mode,
+			#clear out the previous commanded position so we don't shoot back there
+
+		controller.send_command(cmds.SET_ENC_COUNTER, 1, 0) #first motor; set to zero
+		controller.send_command(cmds.SET_ENC_COUNTER, 2, 0) #first motor; set to zero
 
 		time.sleep(DWELL)
-		print(menu_text)
+		menu()
+
+#     drive_speed = 0
+#     #print("Press S to stop")
+#     #print("Press D to drive")
+
+#     track_mode = False
+#     while connected:
+
+#         user_in = input("\nEnter a key to send a command: ")
+
+#         if user_in == 'q':
+#             print("Q pressed")
+#             print("Stopping motion")
+#             drive_speed = 0
+#             controller.send_command(cmds.DUAL_DRIVE, drive_speed, drive_speed)
+            
+#         if user_in == 'x':
+#             print("X pressed")
+#             print("Starting to drive")
+#             drive_speed = 250
+#             controller.send_command(cmds.DUAL_DRIVE, drive_speed, drive_speed)
 
 
-	'''
-	if (selection == 'b'):
+#         if user_in == 'e':
+#             #read encoder count
+#             abscntr_1      = controller.read_value(cmds.READ_ABSCNTR, 1)      # Read encoder counter absolute
+#             abscntr_2      = controller.read_value(cmds.READ_ABSCNTR, 2)      # Read encoder counter absolute
 
-		bytes = ser.read_until(b'\n')
-		current = float(bytes)
-		print(f'Current reading: {current} \n')
+#             print(f"Encoder counts: \nENC1: {abscntr_1} \nENC2: {abscntr_2}")
 
-	elif (selection == 'c'):
+#         if user_in == 'p':
+#             print("P pressed")
+#             kp = input("Enter a new value for Kp: ")
+#             controller.send_command(cmds.KP, kp)
 
-		#bytes = ser.read_until(b'\n')
-		#count = int(bytes)
-		#print(f'Encoder reading: {count} \n')
-		pass
+#         if user_in == 'i':
+#             print("I pressed")
+#             ki = input("Enter a new value for Ki: ")
+#             controller.send_command(cmds.KI, ki)
 
-	elif (selection == 'd'):
+#         if user_in == 'd':
+#             print("D pressed")
+#             kd = input("Enter a new value for Kd: ")
+#             controller.send_command(cmds.KD, kd)
 
-		#bytes = ser.read_until(b'\n')
-		#degs = float(bytes)
-		#print(f'Encoder reading (degrees) {degs} \n')	
-		pass
+#         if user_in == 'm':
+#             print("M pressed")
+#             track_mode = True
 
-	elif (selection == 'e'):
-		#no data to read here; just sends data to the PICO
-		#print('Sent command to reset the encoder count.\n')
-		pass
+#             #get position before changes are applied
+#             abscntr      = controller.read_value(cmds.READ_ABSCNTR, 1)      # Read encoder counter absolute
+#             print(f"Encoder count: {abscntr}")
+            
+#             #NOTE! In the Roborun+ utility, make sure the Roboteq is currently
+#             #in "closed loop count position" mode. Other closed loop position modes
+#             #may work, but this is the tested method as of right now. 
+#             desired_ct1 = input("Enter desired encoder count for Mot1 (will travel to this): ")
+#             desired_ct2 = input("Enter desired encoder count for Mot2 (will travel to this): ")
 
-	elif (selection == 'f'):
-		
-		#pwm = input('Enter a new value for PWM (-100 to 100): ')
-		#serial_text = (str(pwm) + '\n').encode()
-		#ser.write(serial_text)
-		#print(f'New value of PWM: {pwm} \n')
+#             controller.send_command(cmds.MOT_POS, 1, desired_ct1) # check how this command is supposed to wokr
+#             controller.send_command(cmds.MOT_POS, 2, desired_ct2) # check how this command is supposed to wokr
 
+#             '''
+#             MOT_POS = "!P" # Go to motor absolute desired position
+#             MPOS_REL = "!PR" # Go to relative desired position
+#             NXT_POSR = "!PRX" # NEXT go to relative desired position
+#             NXT_POS = "PX" # NEXT go to absolute desired position
+#             '''
 
-	elif (selection == 'g'):
+#         #don't use in this way - this code tries to do position tracking
 
-		##enter new values of position gains
-		#gain = input('Enter new gain Kp for current: ')
-		#gain = float(gain)
-		#serial_text = (str(gain) + '\n').encode()
-		#ser.write(serial_text)
-
-		#gain = input('Enter new gain Ki for current: ')
-		#gain = float(gain)
-		#serial_text = (str(gain) + '\n').encode()
-		#ser.write(serial_text)
-		#print()
-
-	elif (selection == 'h'):
-
-		##read values of current gains from UART
-		#bytes = ser.read_until(b'\n')
-		#gain = float(bytes)
-		#print(f'Value of current gain Kp: {gain}')
-
-		#bytes = ser.read_until(b'\n')
-		#gain = float(bytes)
-		#print(f'Value of current gain Ki: {gain}\n')
-
-	elif (selection == 'i'):
-
-		##set new values of position gains
-		#gain = input('Enter a new value for position gain Kp: ')
-		#gain = float(gain)
-		#serial_text = (str(gain) + '\n').encode()
-		#ser.write(serial_text)
-
-		#gain = input('Enter a new value for position gain Ki: ')
-		#gain = float(gain)
-		#serial_text = (str(gain) + '\n').encode()
-		#ser.write(serial_text)
-
-		#gain = input('Enter a new value for position gain Kd: ')
-		#gain = float(gain)
-		#serial_text = (str(gain) + '\n').encode()
-		#ser.write(serial_text)
-		#print()
-		pass
-
-	elif (selection == 'j'):
-
-		#read values of position gains from UART
-		#bytes = ser.read_until(b'\n')
-		#gain = float(bytes)
-		#print(f'Value of position gain Kp: {gain}')
-
-		#bytes = ser.read_until(b'\n')
-		#gain = float(bytes)
-		#print(f'Value of position gain Ki: {gain}')
-
-		#bytes = ser.read_until(b'\n')
-		#gain = float(bytes)
-		#print(f'Value of position gain Kd: {gain} \n')	
-		pass
+#         #if user_in == 'r':
+#         #    #reset encoder count to zero
+#         #    abscntr      = controller.read_value(cmds.READ_ABSCNTR, 1)      # Read encoder counter absolute
+#         #    print(f"Previous encoder count: {abscntr}")
+#         #    controller.send_command(cmds.SET_ENC_COUNTER, 1, 0) #first motor; set to zero
+#         #    abscntr      = controller.read_value(cmds.READ_ABSCNTR, 1)      # Read encoder counter absolute
+#         #    print(f"New  encoder count: {abscntr}")
+#         #    input("Press any key to continue.")
 
 
-	elif (selection == 'k'):
-
-		#print('Running ITEST mode now. Check plot of datapoints.')
-		#ref_array, curr_array = read_arrays()
-		#plot_arrays(ref_array, curr_array)
-		pass
-
-	elif (selection == 'l'):
-		
-		##go to a position
-		#posn = input('Enter a position to move to: ')
-		#posn = float(posn)
-		#serial_text = (str(posn) + '\n').encode()
-		#ser.write(serial_text)
-		#print()
-
-		#PIC handles the rest from here
-		pass
-
-	elif (selection == 'm'):
-		#send_trajectory('step')
-		pass
-
-	elif (selection == 'n'):
-		#send_trajectory('cubic')
-		pass
-
-	elif (selection == 'o'):
-		pass
-		#print('Executing trajectory...')
-		#traj_list, posn_list = read_arrays()
-		#plot_arrays(traj_list, posn_list)
-
-	elif (selection == 'p'):
-		#print("PIC mode set to IDLE.\n")
-		pass
-
-	elif (selection == 'r'):
-		pass
-
-	elif (selection == 'y'):
-		pass
-
-	elif (selection == 'q'):
-		print('Exiting client')
-		has_quit = True; # exit client
-		# be sure to close the port
-		ser.close()
-
-	else:
-		print('Invalid Selection ' + selection_endline)
-
-	'''
+#         #check if there's a way to display which motor modes are currently active - 
+#         #want to see if open loop or closed loop
+        
 
 
+
+#         #controller.send_command(cmds.DUAL_DRIVE, drive_speed, drive_speed)
+#         #battery_amps = controller.read_value(cmds.READ_BATTERY_AMPS, 1) # Read value 1 of battery amps
+#         #abscntr      = controller.read_value(cmds.READ_ABSCNTR, 1)      # Read encoder counter absolute
+
+#         #print(f"Battery amps: {battery_amps}")
+#         #print(f"Encoder count: {abscntr}") #extra thing added by Sean
+            
+            
+
+        
+        
 
