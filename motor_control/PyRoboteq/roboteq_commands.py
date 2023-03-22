@@ -104,7 +104,11 @@ KDC1 = "!KDC1" #KD curve points for motor 1
 KDC2 = "!KDC2" #KD curve points for motor 2
 
 
-#set mode as closed-loop?
+#change motor operating mode
+MOTOR_MODE = "!MMOD"
+
+#echo back motor mode - testing this out
+MMODE_READ = "~MMOD"
 
 #_PIDM seems promising in the table
 #seems like 

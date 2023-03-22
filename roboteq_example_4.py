@@ -68,8 +68,8 @@ if __name__ == "__main__":
             desired_ct1 = input("Enter desired encoder count for Mot1 (will travel to this): ")
             desired_ct2 = input("Enter desired encoder count for Mot2 (will travel to this): ")
 
-            controller.send_command(cmds.MOT_POS, 1, desired_ct1) # check how this command is supposed to wokr
-            controller.send_command(cmds.MOT_POS, 2, desired_ct2) # check how this command is supposed to wokr
+            controller.send_command(cmds.MOT_POS, 1, desired_ct1) # check how this command is supposed to work
+            controller.send_command(cmds.MOT_POS, 2, desired_ct2) # check how this command is supposed to work
 
             '''
             MOT_POS = "!P" # Go to motor absolute desired position
