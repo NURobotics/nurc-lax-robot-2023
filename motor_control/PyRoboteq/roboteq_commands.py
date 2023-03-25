@@ -105,7 +105,7 @@ KDC2 = "!KDC2" #KD curve points for motor 2
 
 
 #change motor operating mode
-MOTOR_MODE = "!MMOD"
+MOTOR_MODE = "^MMOD"
 
 #echo back motor mode - testing this out
 MMODE_READ = "~MMOD"

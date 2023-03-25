@@ -16,6 +16,8 @@ class Controller(RoboteqHandler):
         super().__init__(exit_on_interrupt, debug_mode)
         self.pulley_rad = 0.012 #mm; doesn't take into account belt thickness
         self.encoder_cpr = 1250
+        self.MAGIC_SCALAR = 1.73 #to adjust conversion from encoder counts to real-world posn
+
 
     def read_curr_state(self):
         '''Read all relevant values from the Roboteq at once. Depending on baud rate,
@@ -39,26 +41,23 @@ class Controller(RoboteqHandler):
         self.temp         = self.read_value(cmds.READ_TEMP, 1)         # Read controller temperature
         self.volts        = self.read_value(cmds.READ_VOLTS, 1)        # Read voltage measured
 
-    def convert_worldspace_to_motor_rot(self, coord):
-        '''Takes a position in the real world, and converts it to necessary
-        angles of rotation of the two motors in the corexy setup.
-        https://corexy.com/theory.html
-
-        Returns: (delta_m1, delta_m2) - rotations of each motor
+    def convert_worldspace_to_encoder_cts(self, delta_x, delta_y):
+        '''Documentation
         '''
-        init_coords = (0,0) #change based on actual posns read by encoders
-        deltax, deltay = [coord[i] - init_coords[i] for i in range(len(coord))]
-    
+        delta_x, delta_y = delta_x / self.MAGIC_SCALAR, delta_y / self.MAGIC_SCALAR
+
         #use corexy principles to find change in motor linear positions.
         #will need to adjust what "m1" and "m2" are defined as later
-        delta_m1_lin = delta_y + delta_x
-        delta_m2_lin = delta_y - delta_x
+        delta_m1_lin =  delta_x - delta_y
+        delta_m2_lin = -delta_x - delta_y
 
         #use x = r*theta to find angular change in motor
         delta_m1 = delta_m1_lin / self.pulley_rad
         delta_m2 = delta_m2_lin / self.pulley_rad
+        encoder_cts_1 = delta_m1 * self.encoder_cpr
+        encoder_cts_2 = delta_m2 * self.encoder_cpr
 
-        return (delta_m1, delta_m2)
+        return (encoder_cts_1, encoder_cts_2)
 
 
     def convert_enc_counts_to_posn(self, enc_count1, enc_count2):
@@ -76,11 +75,10 @@ class Controller(RoboteqHandler):
 
         dx = -0.5*(dM2 - dM1)
         dy = -0.5*(dM1 + dM2)
+        dx, dy = self.MAGIC_SCALAR * dx, self.MAGIC_SCALAR * dy
 
         #assume initial position is at 0, so dx = x and dy = y
         return (dx, dy)
-
-
         
 def set_pid_params(kp, ki, kd):
     '''Sets gains for PID control all at once.'''

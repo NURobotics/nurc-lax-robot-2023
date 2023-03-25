@@ -6,7 +6,6 @@ import time
 
 DRIVE_SPEED = 100
 DWELL = 0.5 #time between commands
-MAGIC_SCALAR = 1.73 #to adjust conversion from encoder counts to real-world posn
 has_quit = False
 estop_active = False #TODO: this may not necessarily be the case on startup; use FM to check status
 
@@ -22,6 +21,8 @@ menu_text = \
 	'r: go to encoder counts \tt: go to real-world posn \n' + \
 	'q: quit client \t\t\tc: ESTOP \t\t\tx: RELEASE ESTOP'
 
+#later: use j and k for setting kp, ki, kd for diff modes
+
 modes_dict_text = {
 	0: "Open Loop Speed Control",
 	1: "Closed Loop Speed Control",
@@ -36,6 +37,14 @@ def menu():
 	print(menu_text)
 	if estop_active:
 		print("Estop is active")
+
+
+def isfloat(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
 
 controller = Controller(debug_mode = False, exit_on_interrupt = False)  # Create the controller object
 is_connected = controller.connect("COM4") # connect to the controller (COM9 for windows, /dev/tty/something for Linux)
@@ -148,7 +157,7 @@ while not has_quit:
 			abscntr_2 = int(abscntr_2.split('=')[-1])
 		
 			(x, y) = controller.convert_enc_counts_to_posn(abscntr_1, abscntr_2)
-			(x, y) = (round(MAGIC_SCALAR * x,3), round(MAGIC_SCALAR * y,3))
+			(x, y) = (round(x,3), round(y,3))
 			print(f"\nWorld coords: ({x}m, {y}m) \n\n")
 		except:
 			print(f"Could not convert counts to int: \n{abscntr_1} \n{abscntr_2}")
@@ -161,14 +170,17 @@ while not has_quit:
 
 	elif keyboard.is_pressed('h'):
 		
-		print("\nSetting current position as home position: \n\n")
+		if motor_mode != 0:
+			print("\nSet Roboteq to Open Loop Mode first; will not execute.\n\n")
+		else:
+			print("\nSetting current position as home position: \n\n")
 
-		#TODO: Check mode, see if it's closed-loop. Change mode to open-loop,
-			#set the posn, and if putting it back into closed-loop mode,
-			#clear out the previous commanded position so we don't shoot back there
-
-		controller.send_command(cmds.SET_ENC_COUNTER, 1, 0) #first motor; set to zero
-		controller.send_command(cmds.SET_ENC_COUNTER, 2, 0) #first motor; set to zero
+			#TODO: Check mode, see if it's closed-loop. Change mode to open-loop,
+				#set the posn, and if putting it back into closed-loop mode,
+				#clear out the previous commanded position so we don't shoot back there
+			
+			controller.send_command(cmds.SET_ENC_COUNTER, 1, 0) #first motor; set to zero
+			controller.send_command(cmds.SET_ENC_COUNTER, 2, 0) #first motor; set to zero
 
 		time.sleep(DWELL)
 		menu()
@@ -176,12 +188,12 @@ while not has_quit:
 
 	elif keyboard.is_pressed('z'):
 
-		if motor_mode == 0:
-			print("\nRoboteq is in open-loop mode; will not execute.\n\n")
+		if motor_mode != 3:
+			print("\nSet Roboteq to Closed Loop Count Position first; will not execute.\n\n")
 		else:
 			print("\nGoing to position (0,0):\n\n")
 			controller.send_command(cmds.MOT_POS, 1, 0) #first motor; set to zero
-			controller.send_command(cmds.MOT_POS, 2, 0) #first motor; set to zero
+			controller.send_command(cmds.MOT_POS, 2, 0) #second motor; set to zero
 
 		time.sleep(DWELL)
 		menu()
@@ -205,7 +217,8 @@ while not has_quit:
 					else:
 						print(f"Setting mode to: {modes_dict_text[int(mode_temp)]}\n\n")
 						motor_mode = int(mode_temp)
-						controller.send_command(cmds.MOTOR_MODE, motor_mode)
+						controller.send_command(cmds.MOTOR_MODE, 1, motor_mode)
+						controller.send_command(cmds.MOTOR_MODE, 2, motor_mode)
 						break						
 
 		time.sleep(DWELL)
@@ -213,8 +226,10 @@ while not has_quit:
 
 	elif keyboard.is_pressed('i'):
 		#getter
-		#no command found for this in the Roboteq manual. instead I'm keeping track of it manually
-		#print(f"\nOperating mode: {modes_dict_text[motor_mode]} \n\n")
+		print("\nValid operating modes:")
+		for x in modes_dict_text.keys():
+			print(f"{x}: {modes_dict_text[x]}")
+
 		op_mode1_raw = controller.read_value(cmds.MMODE_READ, 1)
 		op_mode2_raw = controller.read_value(cmds.MMODE_READ, 2)
 		print(f"\nOperating modes: \nM1: {op_mode1_raw} \nM2: {op_mode2_raw} \n\n")
@@ -224,124 +239,57 @@ while not has_quit:
 
 	elif keyboard.is_pressed('r'):
 		#go to encoder counts
+		if motor_mode != 3:
+			print("\nSet Roboteq to Closed Loop Count Position first; will not execute.\n\n")
+		
+		else:
+			while True:
+				print("\nEnter encoder count positions to travel to.")
+				enc1_raw = input("ENC1: ")
+				enc2_raw = input("ENC2: ")
 
-		while True:
-			print("\nEnter encoder count positions to travel to.")
-			enc1_raw = input("ENC1: ")
-			enc2_raw = input("ENC2: ")
+				if (enc1_raw.isdigit() and enc2_raw.isdigit()):
+					(enc1, enc2) = (int(enc1_raw), int(enc2_raw))
+					print("\nSetting encoder counts.\n\n")
+					controller.send_command(cmds.MOT_POS, 1, enc1)
+					controller.send_command(cmds.MOT_POS, 2, enc2)
+					break
 
-			if (enc1_raw.isdigit() and enc2_raw.isdigit()):
-				(enc1, enc2) = (int(enc1_raw), int(enc2_raw))
-				print("\nSetting encoder counts.\n\n")
-				controller.send_command(cmds.MOT_POS, 1, enc1)
-				controller.send_command(cmds.MOT_POS, 2, enc2)
-				break
-
-			else:
-				print("\nInvalid input; both numbers must be signed ints.")
+				else:
+					print("\nInvalid input; both numbers must be signed ints.")
 
 		time.sleep(DWELL)
 		menu()
 
 	elif keyboard.is_pressed('t'):
 		#go to real-world posn
-		pass
+		if motor_mode != 3:
+			print("\nSet Roboteq to Closed Loop Count Position first; will not execute.\n\n")
+			
+		else:
+			while True:
+				print("\nEnter real world position (in meters) to travel to.")
+				x_raw = input("x (m): ")
+				y_raw = input("y (m): ")
 
-#     drive_speed = 0
-#     #print("Press S to stop")
-#     #print("Press D to drive")
+				if (isfloat(x_raw) and isfloat(y_raw)):
+					(x, y) = (float(x_raw), float(y_raw))
+					(enc1, enc2) = controller.convert_worldspace_to_encoder_cts(x, y)
+					(enc1, enc2) = (round(enc1), round(enc2))
 
-#     track_mode = False
-#     while connected:
+					print(f"\nEncoder counts calculated to go to: \nENC1: {enc1} \nENC2: {enc2}")
+					break
 
-#         user_in = input("\nEnter a key to send a command: ")
+				else:
+					print("\nInvalid input; both numbers must be floats.")
 
-#         if user_in == 'q':
-#             print("Q pressed")
-#             print("Stopping motion")
-#             drive_speed = 0
-#             controller.send_command(cmds.DUAL_DRIVE, drive_speed, drive_speed)
-            
-#         if user_in == 'x':
-#             print("X pressed")
-#             print("Starting to drive")
-#             drive_speed = 250
-#             controller.send_command(cmds.DUAL_DRIVE, drive_speed, drive_speed)
+			decision = input("\nEnter 'y' to go to these encoder counts. ")
+			if 'y'.__eq__(decision.lower()):
+				print("\nSetting encoder counts.\n\n")
+				controller.send_command(cmds.MOT_POS, 1, enc1)
+				controller.send_command(cmds.MOT_POS, 2, enc2)
 
+		time.sleep(DWELL)
+		menu()
 
-#         if user_in == 'e':
-#             #read encoder count
-#             abscntr_1      = controller.read_value(cmds.READ_ABSCNTR, 1)      # Read encoder counter absolute
-#             abscntr_2      = controller.read_value(cmds.READ_ABSCNTR, 2)      # Read encoder counter absolute
-
-#             print(f"Encoder counts: \nENC1: {abscntr_1} \nENC2: {abscntr_2}")
-
-#         if user_in == 'p':
-#             print("P pressed")
-#             kp = input("Enter a new value for Kp: ")
-#             controller.send_command(cmds.KP, kp)
-
-#         if user_in == 'i':
-#             print("I pressed")
-#             ki = input("Enter a new value for Ki: ")
-#             controller.send_command(cmds.KI, ki)
-
-#         if user_in == 'd':
-#             print("D pressed")
-#             kd = input("Enter a new value for Kd: ")
-#             controller.send_command(cmds.KD, kd)
-
-#         if user_in == 'm':
-#             print("M pressed")
-#             track_mode = True
-
-#             #get position before changes are applied
-#             abscntr      = controller.read_value(cmds.READ_ABSCNTR, 1)      # Read encoder counter absolute
-#             print(f"Encoder count: {abscntr}")
-            
-#             #NOTE! In the Roborun+ utility, make sure the Roboteq is currently
-#             #in "closed loop count position" mode. Other closed loop position modes
-#             #may work, but this is the tested method as of right now. 
-#             desired_ct1 = input("Enter desired encoder count for Mot1 (will travel to this): ")
-#             desired_ct2 = input("Enter desired encoder count for Mot2 (will travel to this): ")
-
-#             controller.send_command(cmds.MOT_POS, 1, desired_ct1) # check how this command is supposed to wokr
-#             controller.send_command(cmds.MOT_POS, 2, desired_ct2) # check how this command is supposed to wokr
-
-#             '''
-#             MOT_POS = "!P" # Go to motor absolute desired position
-#             MPOS_REL = "!PR" # Go to relative desired position
-#             NXT_POSR = "!PRX" # NEXT go to relative desired position
-#             NXT_POS = "PX" # NEXT go to absolute desired position
-#             '''
-
-#         #don't use in this way - this code tries to do position tracking
-
-#         #if user_in == 'r':
-#         #    #reset encoder count to zero
-#         #    abscntr      = controller.read_value(cmds.READ_ABSCNTR, 1)      # Read encoder counter absolute
-#         #    print(f"Previous encoder count: {abscntr}")
-#         #    controller.send_command(cmds.SET_ENC_COUNTER, 1, 0) #first motor; set to zero
-#         #    abscntr      = controller.read_value(cmds.READ_ABSCNTR, 1)      # Read encoder counter absolute
-#         #    print(f"New  encoder count: {abscntr}")
-#         #    input("Press any key to continue.")
-
-
-#         #check if there's a way to display which motor modes are currently active - 
-#         #want to see if open loop or closed loop
-        
-
-
-
-#         #controller.send_command(cmds.DUAL_DRIVE, drive_speed, drive_speed)
-#         #battery_amps = controller.read_value(cmds.READ_BATTERY_AMPS, 1) # Read value 1 of battery amps
-#         #abscntr      = controller.read_value(cmds.READ_ABSCNTR, 1)      # Read encoder counter absolute
-
-#         #print(f"Battery amps: {battery_amps}")
-#         #print(f"Encoder count: {abscntr}") #extra thing added by Sean
-            
-            
-
-        
-        
-
+		

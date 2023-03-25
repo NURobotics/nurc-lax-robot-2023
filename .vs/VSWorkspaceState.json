@@ -4,9 +4,7 @@
     "\\motor_control",
     "\\motor_control\\PyRoboteq",
     "\\PyRoboteq",
-    "\\PyRoboteq\\examples",
-    "\\python_gui",
-    "\\python_gui\\code"
+    "\\PyRoboteq\\examples"
   ],
   "SelectedNode": "\\motor_control\\motor_control_gui.py",
   "PreviewInSolutionExplorer": false
