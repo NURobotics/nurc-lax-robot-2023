@@ -4,7 +4,10 @@ from PyRoboteq import roboteq_commands as cmds
 import keyboard
 import time
 
-DRIVE_SPEED = 100
+#for PS controller
+import hid
+
+drive_speed = 100
 DWELL = 0.5 #time between commands
 has_quit = False
 estop_active = False #TODO: this may not necessarily be the case on startup; use FM to check status
@@ -16,9 +19,11 @@ motor_mode = 0
 menu_text = \
 	'ROBOTEQ MOTOR DRIVER INTERFACE \n' + \
 	'WASD keys: move up/down/left/right \n' + \
+	'1234 keys: move diagonally, UR/DL/UL/DR \n\n' + \
 	'e: read encoder counts \t\tf: read world coords  \t\th: set current posn as home \n' + \
 	'u: set closed/open loop state \ti: get closed/open loop state  \tz: go to zero position \n' + \
 	'r: go to encoder counts \tt: go to real-world posn \n' + \
+	'm: get open-loop drive speed \tn: set open-loop drive speed\n' + \
 	'q: quit client \t\t\tc: ESTOP \t\t\tx: RELEASE ESTOP'
 
 #later: use j and k for setting kp, ki, kd for diff modes
@@ -67,7 +72,7 @@ while not has_quit:
 		#send commands to move up
 		while keyboard.is_pressed('w'):
 			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, -DRIVE_SPEED, -DRIVE_SPEED)
+			controller.send_command(cmds.DUAL_DRIVE, -drive_speed, -drive_speed)
 
 		controller.send_command(cmds.DUAL_DRIVE, 0, 0)   
 
@@ -78,7 +83,7 @@ while not has_quit:
 		#send commands to move down
 		while keyboard.is_pressed('s'):
 			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, DRIVE_SPEED, DRIVE_SPEED)
+			controller.send_command(cmds.DUAL_DRIVE, drive_speed, drive_speed)
 
 		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
 
@@ -89,7 +94,7 @@ while not has_quit:
 		#send commands to move left
 		while keyboard.is_pressed('a'):
 			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, -DRIVE_SPEED, DRIVE_SPEED)
+			controller.send_command(cmds.DUAL_DRIVE, -drive_speed, drive_speed)
 
 		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
 
@@ -100,11 +105,61 @@ while not has_quit:
 		#send commands to move right
 		while keyboard.is_pressed('d'):
 			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, DRIVE_SPEED, -DRIVE_SPEED)
+			controller.send_command(cmds.DUAL_DRIVE, drive_speed, -drive_speed)
 
 		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
 
 	###
+
+	#diagonal motion commands
+
+	if keyboard.is_pressed('1'):
+
+		#send commands to move up-right
+		while keyboard.is_pressed('1'):
+			#wait until user is done sending commands
+			controller.send_command(cmds.DUAL_DRIVE, 0, -drive_speed)
+			pass
+
+		controller.send_command(cmds.DUAL_DRIVE, 0, 0)   
+
+	###
+
+	elif keyboard.is_pressed('2'):
+
+		#send commands to move down-left
+		while keyboard.is_pressed('2'):
+			#wait until user is done sending commands
+			controller.send_command(cmds.DUAL_DRIVE, 0, drive_speed)
+			pass
+
+		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
+
+	###
+
+	elif keyboard.is_pressed('3'):
+
+		#send commands to move up-left
+		while keyboard.is_pressed('3'):
+			#wait until user is done sending commands
+			controller.send_command(cmds.DUAL_DRIVE, -drive_speed, 0)
+			pass
+
+		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
+
+	###
+
+	elif keyboard.is_pressed('4'):
+
+		#send commands to move down-right
+		while keyboard.is_pressed('4'):
+			#wait until user is done sending commands
+			controller.send_command(cmds.DUAL_DRIVE, drive_speed, 0)
+			pass
+
+		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
+
+
 
 	elif keyboard.is_pressed('q'):
 
@@ -192,8 +247,21 @@ while not has_quit:
 			print("\nSet Roboteq to Closed Loop Count Position first; will not execute.\n\n")
 		else:
 			print("\nGoing to position (0,0):\n\n")
-			controller.send_command(cmds.MOT_POS, 1, 0) #first motor; set to zero
-			controller.send_command(cmds.MOT_POS, 2, 0) #second motor; set to zero
+			#controller.send_command(cmds.MOT_POS, 1, 0) #first motor; go to zero
+			#controller.send_command(cmds.MOT_POS, 2, 0) #second motor; go to zero
+			#controller.send_command(cmds.MOT_POS, 1, 0) #first motor; go to zero
+			#time.sleep(0.05)
+			#controller.send_command(cmds.MOT_POS, 1, 0) #second motor; go to zero
+			#controller.send_command(cmds.NXT_POS, 2, 0) #second motor; go to zero
+			#controller.send_command(cmds.NXT_POS, 1, 0) #first motor; go to zero
+
+			#controller.send_command(cmds.NXT_POS, 1, 0) #second motor; go to zero
+
+			controller.send_command(cmds.MOT_POS, 1, 0) #second motor; go to zero
+			time.sleep(1)
+			controller.send_command(cmds.MOT_POS, 2, 0) #second motor; go to zero
+
+
 
 		time.sleep(DWELL)
 		menu()
@@ -253,6 +321,8 @@ while not has_quit:
 					print("\nSetting encoder counts.\n\n")
 					controller.send_command(cmds.MOT_POS, 1, enc1)
 					controller.send_command(cmds.MOT_POS, 2, enc2)
+					#controller.send_command(cmds.MOT_POS, 1, enc1)
+					#controller.send_command(cmds.NXT_POS, 2, enc2)
 					break
 
 				else:
@@ -288,8 +358,78 @@ while not has_quit:
 				print("\nSetting encoder counts.\n\n")
 				controller.send_command(cmds.MOT_POS, 1, enc1)
 				controller.send_command(cmds.MOT_POS, 2, enc2)
+				#controller.send_command(cmds.MOT_POS, 1, enc1)
+				#controller.send_command(cmds.NXT_POS, 2, enc2)
 
 		time.sleep(DWELL)
 		menu()
 
+	elif keyboard.is_pressed('m'):
+		#get motor speed
+		print(f"\nMotor speed (0-1000): {drive_speed} \n\n")
+
+		time.sleep(DWELL)
+		menu()
+
+	elif keyboard.is_pressed('n'):
+		#set new motor speed
+		while True:
+			speed_raw = input("\nEnter new open-loop drive speed between 0 and 1000 (default: 100): ")
+
+			if (speed_raw.isdigit() and int(speed_raw) > 0 and int(speed_raw) < 1000):
+
+				drive_speed = int(speed_raw)
+				print(f"\nNew drive speed: {drive_speed} \n\n")
+				break
+
+			else:
+				print("\nInvalid input; enter an int between the specified bounds.")
+
+		time.sleep(DWELL)
+		menu()
+
+	elif keyboard.is_pressed('l'):
+		#put the system into video-game controller mode.
+		decision = input('\nPress (y) and enter to activate video-game controller mode. ')
+		
+		if decision.lower().__eq__('y'):
+	
+			# Set up HID device
+			VENDOR_ID = 0x0079
+			PRODUCT_ID = 0x0006
+			device = hid.device()
+			device.open(VENDOR_ID, PRODUCT_ID)
+
+			print(f"\nCurrent drive speed: {drive_speed}")
+			print("Press 'L' again to exit video-game controller mode.")
+
+			# Read data on a non-precise interval timer
+			while True:
+				if keyboard.is_pressed('l'):
+					break
+
+				# Read input report
+				report = device.read(64)
+				xraw = report[0]
+				yraw = report[1]
+
+				#convert to normalized x and y vectors
+				x =  (xraw-128)/128
+				y = -(yraw-128)/128
+
+				#convert to motor rotations
+				M1 =  (x-y) * drive_speed
+				M2 = (-x-y) * drive_speed
+    
+				# Parse the data and print it to the console
+				#print(f'Unscaled values: ({xraw}, {yraw})  ' + \
+				#		f'Scaled: ({round(x,3)}, {round(y,3)})  ' + \
+				#		f'Mot. speed: ({int(M1)}, {int(M2)})')
+				controller.send_command(cmds.DUAL_DRIVE, M1, M2)
+
+				
+		print("\nExiting.\n\n")
+		time.sleep(DWELL)
+		menu()
+	
 		
