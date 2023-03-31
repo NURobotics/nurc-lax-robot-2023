@@ -22,8 +22,9 @@ menu_text = \
 	'1234 keys: move diagonally, UR/DL/UL/DR \n\n' + \
 	'e: read encoder counts \t\tf: read world coords  \t\th: set current posn as home \n' + \
 	'u: set closed/open loop state \ti: get closed/open loop state  \tz: go to zero position \n' + \
-	'r: go to encoder counts \tt: go to real-world posn \n' + \
-	'm: get open-loop drive speed \tn: set open-loop drive speed\n' + \
+	'r: go to encoder counts \tt: go to real-world posn \tk: send new Kp, Ki, Kd\n' + \
+	'm: get open-loop drive speed \tn: set open-loop drive speed \tl: game controller mode \n' + \
+	'b: send raw commands to Roboteq \tp: set max closed-loop speed and accel\n' + \
 	'q: quit client \t\t\tc: ESTOP \t\t\tx: RELEASE ESTOP'
 
 #later: use j and k for setting kp, ki, kd for diff modes
@@ -247,21 +248,9 @@ while not has_quit:
 			print("\nSet Roboteq to Closed Loop Count Position first; will not execute.\n\n")
 		else:
 			print("\nGoing to position (0,0):\n\n")
-			#controller.send_command(cmds.MOT_POS, 1, 0) #first motor; go to zero
-			#controller.send_command(cmds.MOT_POS, 2, 0) #second motor; go to zero
-			#controller.send_command(cmds.MOT_POS, 1, 0) #first motor; go to zero
-			#time.sleep(0.05)
-			#controller.send_command(cmds.MOT_POS, 1, 0) #second motor; go to zero
-			#controller.send_command(cmds.NXT_POS, 2, 0) #second motor; go to zero
-			#controller.send_command(cmds.NXT_POS, 1, 0) #first motor; go to zero
-
-			#controller.send_command(cmds.NXT_POS, 1, 0) #second motor; go to zero
-
-			controller.send_command(cmds.MOT_POS, 1, 0) #second motor; go to zero
-			time.sleep(1)
-			controller.send_command(cmds.MOT_POS, 2, 0) #second motor; go to zero
-
-
+			cmd = "!P 1 0 _!P 2 0 "
+			result = controller.request_handler(cmd) #send_raw_command works the same; this grabs returned data
+			print(result)
 
 		time.sleep(DWELL)
 		menu()
@@ -298,8 +287,8 @@ while not has_quit:
 		for x in modes_dict_text.keys():
 			print(f"{x}: {modes_dict_text[x]}")
 
-		op_mode1_raw = controller.read_value(cmds.MMODE_READ, 1)
-		op_mode2_raw = controller.read_value(cmds.MMODE_READ, 2)
+		op_mode1_raw = controller.read_value(cmds.READ_MMODE, 1)
+		op_mode2_raw = controller.read_value(cmds.READ_MMODE, 2)
 		print(f"\nOperating modes: \nM1: {op_mode1_raw} \nM2: {op_mode2_raw} \n\n")
 
 		time.sleep(DWELL)
@@ -319,10 +308,14 @@ while not has_quit:
 				if (enc1_raw.isdigit() and enc2_raw.isdigit()):
 					(enc1, enc2) = (int(enc1_raw), int(enc2_raw))
 					print("\nSetting encoder counts.\n\n")
-					controller.send_command(cmds.MOT_POS, 1, enc1)
-					controller.send_command(cmds.MOT_POS, 2, enc2)
+					#controller.send_command(cmds.MOT_POS, 1, enc1)
+					#controller.send_command(cmds.MOT_POS, 2, enc2)
 					#controller.send_command(cmds.MOT_POS, 1, enc1)
 					#controller.send_command(cmds.NXT_POS, 2, enc2)
+
+					cmd = f"!P 1 {enc1} _!P 2 {enc2} "
+					result = controller.request_handler(cmd) #send_raw_command works the same; this grabs returned data
+					print(result)
 					break
 
 				else:
@@ -356,10 +349,13 @@ while not has_quit:
 			decision = input("\nEnter 'y' to go to these encoder counts. ")
 			if 'y'.__eq__(decision.lower()):
 				print("\nSetting encoder counts.\n\n")
-				controller.send_command(cmds.MOT_POS, 1, enc1)
-				controller.send_command(cmds.MOT_POS, 2, enc2)
+				#controller.send_command(cmds.MOT_POS, 1, enc1)
+				#controller.send_command(cmds.MOT_POS, 2, enc2)
 				#controller.send_command(cmds.MOT_POS, 1, enc1)
 				#controller.send_command(cmds.NXT_POS, 2, enc2)
+				cmd = f"!P 1 {enc1} _!P 2 {enc2} "
+				result = controller.request_handler(cmd) #send_raw_command works the same; this grabs returned data
+				print(result)
 
 		time.sleep(DWELL)
 		menu()
@@ -398,7 +394,11 @@ while not has_quit:
 			VENDOR_ID = 0x0079
 			PRODUCT_ID = 0x0006
 			device = hid.device()
-			device.open(VENDOR_ID, PRODUCT_ID)
+			try:
+				device.open(VENDOR_ID, PRODUCT_ID)
+			except:
+				print("\nCould not connect to controller. Exiting.\n\n")
+				continue
 
 			print(f"\nCurrent drive speed: {drive_speed}")
 			print("Press 'L' again to exit video-game controller mode.")
@@ -429,6 +429,54 @@ while not has_quit:
 
 				
 		print("\nExiting.\n\n")
+		time.sleep(DWELL)
+		menu()
+
+	elif keyboard.is_pressed('k'):
+
+		pass
+
+	elif keyboard.is_pressed('p'):
+
+		#max_vel_old = 
+		#print("Enter new values for max speed and accel").
+
+		pass
+
+
+	elif keyboard.is_pressed('b'):
+
+		print("\nFormat of common commands to send to the Roboteq: \n" + \
+				"!<RUNTIME_COMMAND> <CHANNEL> <VALUE> (ex: !G 1 100) or\n" + \
+				"?<RUNTIME_QUERY> <CHANNEL> (ex: ?C 1) \n" + \
+				"Other commands, like % and ^ commands, can be dangerous to execute - be careful.")
+
+		cmd = input('\nEnter a command to send to the Roboteq (q to exit). ')
+		if cmd.lower() == 'q':
+			pass
+
+		#there are more validation tests to do for the command, but this will be a start
+		elif cmd[0] in ["!","?","^"]: #and len(cmd.split(' ')) in [2, 3]:
+
+			#this method is limited but produces results. we want the ability to send more than 1 line at once using "_"
+			'''
+			if "?" in cmd[0]:
+				rcvd = controller.read_value(*cmd.split(' '))
+				print(rcvd)
+
+			else:
+				controller.send_command(*cmd.split(' '))
+			'''
+			if cmd[-1] != " ":
+				cmd = cmd + " "
+
+			result = controller.request_handler(cmd) #send_raw_command works the same; this grabs returned data
+			print(result)
+
+		else:
+			print("Invalid command; exiting.\n")
+
+		print()
 		time.sleep(DWELL)
 		menu()
 	

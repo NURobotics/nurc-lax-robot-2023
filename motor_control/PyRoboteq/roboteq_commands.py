@@ -106,9 +106,15 @@ KDC2 = "!KDC2" #KD curve points for motor 2
 
 #change motor operating mode
 MOTOR_MODE = "^MMOD"
+CL_MAX_ACCEL = "^MAC" #CL = closed-loop
+CL_MAX_DECEL = "^MDEC"
+CL_MAX_VEL = "^MVEL"
 
 #echo back motor mode - testing this out
-MMODE_READ = "~MMOD"
+READ_MMODE = "~MMOD"
+READ_MVEL  = "~MVEL"
+READ_MAC   = "~MAC"
+READ_MDEC  = "~MDEC"
 
 #_PIDM seems promising in the table
 #seems like 
