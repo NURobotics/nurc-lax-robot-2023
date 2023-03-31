@@ -3,9 +3,18 @@ from motor_controller import Controller
 from PyRoboteq import roboteq_commands as cmds
 import keyboard
 import time
+import sys
 
 #for PS controller
 import hid
+
+#for visual GUI
+#parent_dir = os.path.dirname(os.getcwd())
+sys.path.append("C:/Users/seanp/Documents/lacrosse/code/nurc-lax-bot-2023/motor_control/python_gui/code")
+from GUI import GUI, init_gui
+from geometry import win_height, win_width
+
+#------------------------------------------------#
 
 drive_speed = 100
 DWELL = 0.5 #time between commands
@@ -24,7 +33,8 @@ menu_text = \
 	'u: set closed/open loop state \ti: get closed/open loop state  \tz: go to zero position \n' + \
 	'r: go to encoder counts \tt: go to real-world posn \tk: send new Kp, Ki, Kd\n' + \
 	'm: get open-loop drive speed \tn: set open-loop drive speed \tl: game controller mode \n' + \
-	'b: send raw commands to Roboteq \tp: set max closed-loop speed and accel\n' + \
+	'b: send raw serial cmds \tp: set max closed-loop speed and accel\n' + \
+	'g: visual GUI (closed-loop position) \n' + \
 	'q: quit client \t\t\tc: ESTOP \t\t\tx: RELEASE ESTOP'
 
 #later: use j and k for setting kp, ki, kd for diff modes
@@ -477,6 +487,21 @@ while not has_quit:
 			print("Invalid command; exiting.\n")
 
 		print()
+		time.sleep(DWELL)
+		menu()
+
+	elif keyboard.is_pressed('g'):
+
+		if motor_mode != 3:
+			print("\nSet Roboteq to Closed Loop Count Position first; will not execute.\n\n")
+		else:
+			print("\nStarting visual GUI:\n")
+			gui = GUI(win_height, win_width, "../media/lax_goalie_diagram.png", controller) #namespace for variables: geometry.py
+			init_gui(gui)
+			while True:
+				#allow user to use this infinitely
+				pass
+		
 		time.sleep(DWELL)
 		menu()
 	

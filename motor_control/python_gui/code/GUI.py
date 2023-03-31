@@ -5,14 +5,18 @@ from geometry import *
 from helpers import *
 from plotting_helpers import *
 
+
+#parent_dir = os.path.dirname(os.getcwd())
+#sys.path.append("C:/Users/seanp/Documents/lacrosse/code/nurc-lax-bot-2023/motor_control")
+#from PyRoboteq import roboteq_commands as cmds
+#from motor_controller import Controller
+
 ###########
 
-def init_gui():
+def init_gui(gui):
     
     #----------------initialize GUI----------------------#
-
     framerate_ms = 20
-    gui = GUI(win_height, win_width, "../media/lax_goalie_diagram.png") #namespace for variables: geometry.py
     gui.load_gui_params(1, 1, coordsys_len, GsGUI, 
                     framerate_ms, '../sprites/impact_sparks.png') #plotting_helpers.py
 
@@ -37,7 +41,7 @@ def init_gui():
 
 class GUI:
 
-    def __init__(self, win_height, win_width, photo_filepath):
+    def __init__(self, win_height, win_width, photo_filepath, controller):
 
         #future improvement: should inherit from the Tk class
         self.root = tk.Tk()
@@ -57,6 +61,9 @@ class GUI:
         self.impact_photoID = None
         self.mouse_posn_gui = [win_width//2, win_height//2]
         self.mouse_posn_s = [0,0]
+
+        #new: let the GUI take the controller so we can send cmds to it
+        self.controller = controller
 
     ###
 
@@ -237,5 +244,14 @@ class GUI:
 
     def on_click(self, event):
         print(self.mouse_posn_s)
+        (x, y) = self.mouse_posn_s
+        (enc1, enc2) = self.controller.convert_worldspace_to_encoder_cts(x, y)
+        (enc1, enc2) = (round(enc1), round(enc2))
+
+        cmd = f"!P 1 {enc1} _!P 2 {enc2} "
+        print(f"Sending command: {cmd}")
+        result = self.controller.request_handler(cmd) #send_raw_command works the same; this grabs returned data
+        print(result)
+
         #print([event.x, event.y])
         
