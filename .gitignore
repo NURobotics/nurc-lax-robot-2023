@@ -6,3 +6,4 @@ yolo-balls/*
 python_gui/.vs/*
 python_gui/code/.vs/*
 *.pyc
+*.suo

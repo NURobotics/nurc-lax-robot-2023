@@ -169,7 +169,8 @@ def draw_image(canvas:tk.Canvas, gui, center:tuple, file_path:str, size:int=0,
         image = image.resize((int(default_width * scale[0]), \
                              int(default_height * scale[1])), Image.ANTIALIAS)
     else:
-        print("Not rescaling lol")
+        #print("Not rescaling lol")
+        pass
 
 
     # turns the file name into a tkinter Photo Image using PIL
