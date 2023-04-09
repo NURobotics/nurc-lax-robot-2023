@@ -34,6 +34,8 @@ while True:
             f'Scaled: ({round(x,3)}, {round(y,3)})  ' + \
             f'Mot. speed: ({int(M1)}, {int(M2)})')
 
+    print(f'Report[6]: {report[6]}')
+
     '''
     Button mapping (note: press the "Analog Mode" button on the controller
     for these results; otherwise it's different):

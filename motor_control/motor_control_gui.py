@@ -1,66 +1,21 @@
 #from PyRoboteq import RoboteqHandler
 from motor_controller import Controller
 from PyRoboteq import roboteq_commands as cmds
-import keyboard
+from control_gui_helpers import *
+#import keyboard
 import time
 import sys
-
-#for PS controller
-import hid
+import os
 
 #for visual GUI
-#parent_dir = os.path.dirname(os.getcwd())
-sys.path.append("C:/Users/seanp/Documents/lacrosse/code/nurc-lax-bot-2023/motor_control/python_gui/code")
+curr_dir = os.path.dirname(os.getcwd())
+new_dir = curr_dir + '\\motor_control\\python_gui\\code'
+sys.path.append(new_dir)
+
 from GUI import GUI, init_gui
 from geometry import win_height, win_width
 
 #------------------------------------------------#
-
-drive_speed = 100
-DWELL = 0.5 #time between commands
-has_quit = False
-estop_active = False #TODO: this may not necessarily be the case on startup; use FM to check status
-
-abscntr_1 = None
-abscntr_2 = None
-motor_mode = 0
-
-menu_text = \
-	'ROBOTEQ MOTOR DRIVER INTERFACE \n' + \
-	'WASD keys: move up/down/left/right \n' + \
-	'1234 keys: move diagonally, UR/DL/UL/DR \n\n' + \
-	'e: read encoder counts \t\tf: read world coords  \t\th: set current posn as home \n' + \
-	'u: set closed/open loop state \ti: get closed/open loop state  \tz: go to zero position \n' + \
-	'r: go to encoder counts \tt: go to real-world posn \tk: send new Kp, Ki, Kd\n' + \
-	'm: get open-loop drive speed \tn: set open-loop drive speed \tl: game controller mode \n' + \
-	'b: send raw serial cmds \tp: set max closed-loop speed and accel\n' + \
-	'g: visual GUI (closed-loop position) \n' + \
-	'q: quit client \t\t\tc: ESTOP \t\t\tx: RELEASE ESTOP'
-
-#later: use j and k for setting kp, ki, kd for diff modes
-
-modes_dict_text = {
-	0: "Open Loop Speed Control",
-	1: "Closed Loop Speed Control",
-	2: "Closed Loop Position Relative Control", #-1000 to 1000 scale
-	3: "Closed Loop Count Position (*)", #preferred. position input
-	4: "Closed Loop Position Tracking (!)", #-1000 to 1000 scale. danger - setting mode to this caused rapid motion on startup
-	5: "Torque Mode (!)", #don't use this for our project - can burn out a motor
-	6: "Closed Loop Speed Position Control", #not preferred. speed input
-}
-
-def menu():
-	print(menu_text)
-	if estop_active:
-		print("Estop is active")
-
-
-def isfloat(num):
-    try:
-        float(num)
-        return True
-    except ValueError:
-        return False
 
 controller = Controller(debug_mode = False, exit_on_interrupt = False)  # Create the controller object
 is_connected = controller.connect("COM4") # connect to the controller (COM9 for windows, /dev/tty/something for Linux)
@@ -75,104 +30,47 @@ controller.send_command(cmds.MOTOR_MODE, motor_mode)
 menu()
 while not has_quit:
 
-	#ser.flush()
-	#Menuing: use keyboard.is_pressed() to detect instant input
+	user_cmd = input("\nEnter a command: ")
 
-	if keyboard.is_pressed('w'):
+	if user_cmd.lower() == ('w'):
+		print("\nEntering open-loop WASD mode." + \
+			"\nPress WASD for u/d/l/r motion and 1234 for ur/dl/ul/dr motion." + \
+			"\nPress 'q' to quit.")
+		try:
+			import keyboard
+		except:
+			raise Exception("Motor controller: keyboard library not imported correctly; \n" + \
+							"This is a known issue with Mac and Linux OS.")
 
-		#send commands to move up
-		while keyboard.is_pressed('w'):
-			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, -drive_speed, -drive_speed)
+		def key_responder(key):
+			''' A brief format for how the program should respond to a keypress of WASD,1234.
+			'''
+			M1, M2 = drive_speeds_dict[key]	
+			while keyboard.is_pressed(key):
+				#wait until user is done sending commands
+				controller.send_command(cmds.DUAL_DRIVE, M1, M2)
+			controller.send_command(cmds.DUAL_DRIVE, 0, 0)   
 
-		controller.send_command(cmds.DUAL_DRIVE, 0, 0)   
 
-	###
+		while (1):
+			if keyboard.is_pressed('w'): key_responder('w')
+			if keyboard.is_pressed('a'): key_responder('a')
+			if keyboard.is_pressed('s'): key_responder('s')
+			if keyboard.is_pressed('d'): key_responder('d')
+			if keyboard.is_pressed('1'): key_responder('1')
+			if keyboard.is_pressed('2'): key_responder('2')
+			if keyboard.is_pressed('3'): key_responder('3')
+			if keyboard.is_pressed('4'): key_responder('4')
+			
+			if keyboard.is_pressed('q'): break
 
-	elif keyboard.is_pressed('s'):
-
-		#send commands to move down
-		while keyboard.is_pressed('s'):
-			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, drive_speed, drive_speed)
-
-		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
-
-	###
-
-	elif keyboard.is_pressed('a'):
-
-		#send commands to move left
-		while keyboard.is_pressed('a'):
-			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, -drive_speed, drive_speed)
-
-		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
-
-	###
-
-	elif keyboard.is_pressed('d'):
-
-		#send commands to move right
-		while keyboard.is_pressed('d'):
-			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, drive_speed, -drive_speed)
-
-		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
+		print('\nQuitting.\n\n')
+		time.sleep(DWELL)
+		menu()
 
 	###
 
-	#diagonal motion commands
-
-	if keyboard.is_pressed('1'):
-
-		#send commands to move up-right
-		while keyboard.is_pressed('1'):
-			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, 0, -drive_speed)
-			pass
-
-		controller.send_command(cmds.DUAL_DRIVE, 0, 0)   
-
-	###
-
-	elif keyboard.is_pressed('2'):
-
-		#send commands to move down-left
-		while keyboard.is_pressed('2'):
-			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, 0, drive_speed)
-			pass
-
-		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
-
-	###
-
-	elif keyboard.is_pressed('3'):
-
-		#send commands to move up-left
-		while keyboard.is_pressed('3'):
-			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, -drive_speed, 0)
-			pass
-
-		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
-
-	###
-
-	elif keyboard.is_pressed('4'):
-
-		#send commands to move down-right
-		while keyboard.is_pressed('4'):
-			#wait until user is done sending commands
-			controller.send_command(cmds.DUAL_DRIVE, drive_speed, 0)
-			pass
-
-		controller.send_command(cmds.DUAL_DRIVE, 0, 0)  
-
-
-
-	elif keyboard.is_pressed('q'):
+	elif user_cmd.lower() == ('q'):
 
 		print('\nExiting client\n\n')
 		has_quit = True # exit client
@@ -181,7 +79,7 @@ while not has_quit:
 
 	###
 
-	elif keyboard.is_pressed('c'):
+	elif user_cmd.lower() == ('c'):
 
 		print('\nHitting emergency stop \n\n')
 		controller.send_command(cmds.EM_STOP) # this will send 0 argument command for emergency stop
@@ -190,7 +88,7 @@ while not has_quit:
 		time.sleep(DWELL)
 		menu()
 
-	elif keyboard.is_pressed('x'):
+	elif user_cmd.lower() == ('x'):
 
 		print('\nReleasing emergency stop \n\n')
 		controller.send_command(cmds.REL_EM_STOP)
@@ -201,7 +99,7 @@ while not has_quit:
 
 	###
 
-	elif keyboard.is_pressed('e'):
+	elif user_cmd.lower() == ('e'):
 
 		abscntr_1      = (controller.read_value(cmds.READ_ABSCNTR, 1))      # Read encoder counter absolute
 		abscntr_2      = (controller.read_value(cmds.READ_ABSCNTR, 2))      # Read encoder counter absolute
@@ -214,7 +112,7 @@ while not has_quit:
 
 	###
 
-	elif keyboard.is_pressed('f'):
+	elif user_cmd.lower() == ('f'):
 
 		abscntr_1      = (controller.read_value(cmds.READ_ABSCNTR, 1))      # Read encoder counter absolute
 		abscntr_2      = (controller.read_value(cmds.READ_ABSCNTR, 2))      # Read encoder counter absolute
@@ -234,7 +132,7 @@ while not has_quit:
 
 	###
 
-	elif keyboard.is_pressed('h'):
+	elif user_cmd.lower() == ('h'):
 		
 		if motor_mode != 0:
 			print("\nSet Roboteq to Open Loop Mode first; will not execute.\n\n")
@@ -252,7 +150,7 @@ while not has_quit:
 		menu()
 
 
-	elif keyboard.is_pressed('z'):
+	elif user_cmd.lower() == ('z'):
 
 		if motor_mode != 3:
 			print("\nSet Roboteq to Closed Loop Count Position first; will not execute.\n\n")
@@ -265,7 +163,7 @@ while not has_quit:
 		time.sleep(DWELL)
 		menu()
 
-	elif keyboard.is_pressed('u'):
+	elif user_cmd.lower() == ('u'):
 		#setter
 		#controller.ser.flush() - this didn't work for clearing past inputs
 		time.sleep(0.2)
@@ -291,7 +189,7 @@ while not has_quit:
 		time.sleep(DWELL)
 		menu()
 
-	elif keyboard.is_pressed('i'):
+	elif user_cmd.lower() == ('i'):
 		#getter
 		print("\nValid operating modes:")
 		for x in modes_dict_text.keys():
@@ -304,7 +202,7 @@ while not has_quit:
 		time.sleep(DWELL)
 		menu()
 
-	elif keyboard.is_pressed('r'):
+	elif user_cmd.lower() == ('r'):
 		#go to encoder counts
 		if motor_mode != 3:
 			print("\nSet Roboteq to Closed Loop Count Position first; will not execute.\n\n")
@@ -334,7 +232,7 @@ while not has_quit:
 		time.sleep(DWELL)
 		menu()
 
-	elif keyboard.is_pressed('t'):
+	elif user_cmd.lower() == ('t'):
 		#go to real-world posn
 		if motor_mode != 3:
 			print("\nSet Roboteq to Closed Loop Count Position first; will not execute.\n\n")
@@ -370,14 +268,14 @@ while not has_quit:
 		time.sleep(DWELL)
 		menu()
 
-	elif keyboard.is_pressed('m'):
+	elif user_cmd.lower() == ('m'):
 		#get motor speed
 		print(f"\nMotor speed (0-1000): {drive_speed} \n\n")
 
 		time.sleep(DWELL)
 		menu()
 
-	elif keyboard.is_pressed('n'):
+	elif user_cmd.lower() == ('n'):
 		#set new motor speed
 		while True:
 			speed_raw = input("\nEnter new open-loop drive speed between 0 and 1000 (default: 100): ")
@@ -394,12 +292,18 @@ while not has_quit:
 		time.sleep(DWELL)
 		menu()
 
-	elif keyboard.is_pressed('l'):
+	elif user_cmd.lower() == ('l'):
 		#put the system into video-game controller mode.
 		decision = input('\nPress (y) and enter to activate video-game controller mode. ')
 		
 		if decision.lower().__eq__('y'):
 	
+			#for PS controller
+			try:
+				import hid
+			except:
+				raise Exception("Motor control GUI: run 'pip install hid' to access this command")
+
 			# Set up HID device
 			VENDOR_ID = 0x0079
 			PRODUCT_ID = 0x0006
@@ -411,17 +315,22 @@ while not has_quit:
 				continue
 
 			print(f"\nCurrent drive speed: {drive_speed}")
-			print("Press 'L' again to exit video-game controller mode.")
+			print("Press 'Start' or 'Select' on controller to exit video-game controller mode.")
 
 			# Read data on a non-precise interval timer
 			while True:
-				if keyboard.is_pressed('l'):
-					break
+				#if keyboard.is_pressed('l'):
+				#	break
 
 				# Read input report
 				report = device.read(64)
 				xraw = report[0]
 				yraw = report[1]
+				start_select = report[6]
+
+				if (start_select != 0): 
+					controller.send_command(cmds.DUAL_DRIVE, 0, 0)   
+					break
 
 				#convert to normalized x and y vectors
 				x =  (xraw-128)/128
@@ -442,11 +351,11 @@ while not has_quit:
 		time.sleep(DWELL)
 		menu()
 
-	elif keyboard.is_pressed('k'):
+	elif user_cmd.lower() == ('k'):
 
 		pass
 
-	elif keyboard.is_pressed('p'):
+	elif user_cmd.lower() == ('p'):
 
 		#max_vel_old = 
 		#print("Enter new values for max speed and accel").
@@ -454,7 +363,7 @@ while not has_quit:
 		pass
 
 
-	elif keyboard.is_pressed('b'):
+	elif user_cmd.lower() == ('b'):
 
 		print("\nFormat of common commands to send to the Roboteq: \n" + \
 				"!<RUNTIME_COMMAND> <CHANNEL> <VALUE> (ex: !G 1 100) or\n" + \
@@ -490,7 +399,7 @@ while not has_quit:
 		time.sleep(DWELL)
 		menu()
 
-	elif keyboard.is_pressed('g'):
+	elif user_cmd.lower() == ('g'):
 
 		if motor_mode != 3:
 			print("\nSet Roboteq to Closed Loop Count Position first; will not execute.\n\n")
