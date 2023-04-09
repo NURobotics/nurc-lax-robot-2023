@@ -12,23 +12,20 @@ curr_dir = os.path.dirname(os.getcwd())
 new_dir = curr_dir + '\\motor_control\\python_gui\\code'
 sys.path.append(new_dir)
 
-
-
-
-#TESTING - GIT HISTORY
-
-
-
-from GUI import GUI, init_gui
-from geometry import win_height, win_width
+from python_gui.code.GUI import GUI, init_gui
+from python_gui.code.geometry import win_height, win_width
 
 #------------------------------------------------#
 
 controller = Controller(debug_mode = False, exit_on_interrupt = False)  # Create the controller object
-is_connected = controller.connect("COM4") # connect to the controller (COM9 for windows, /dev/tty/something for Linux)
+is_connected = controller.connect("/dev/tty.usbmodemC13E847AFFFF1")
+# connect to the controller:
+# 1) COM9 for windows
+# 2) /dev/tty/.* for Linux/Unix, and find the USB port it's actually connected to using trial/error)
+
 
 if (not is_connected):
-    raise Exception("Error in connection")
+	raise Exception("Error in connection")
 
 #--------------------------#
 controller.send_command(cmds.MOTOR_MODE, motor_mode)
@@ -121,8 +118,8 @@ while not has_quit:
 
 	elif user_cmd.lower() == ('f'):
 
-		abscntr_1      = (controller.read_value(cmds.READ_ABSCNTR, 1))      # Read encoder counter absolute
-		abscntr_2      = (controller.read_value(cmds.READ_ABSCNTR, 2))      # Read encoder counter absolute
+		abscntr_1 = (controller.read_value(cmds.READ_ABSCNTR, 1))      # Read encoder counter absolute
+		abscntr_2 = (controller.read_value(cmds.READ_ABSCNTR, 2))      # Read encoder counter absolute
 		try:
 			abscntr_1 = int(abscntr_1.split('=')[-1])
 			abscntr_2 = int(abscntr_2.split('=')[-1])
@@ -346,7 +343,7 @@ while not has_quit:
 				#convert to motor rotations
 				M1 =  (x-y) * drive_speed
 				M2 = (-x-y) * drive_speed
-    
+
 				# Parse the data and print it to the console
 				#print(f'Unscaled values: ({xraw}, {yraw})  ' + \
 				#		f'Scaled: ({round(x,3)}, {round(y,3)})  ' + \
@@ -360,14 +357,30 @@ while not has_quit:
 
 	elif user_cmd.lower() == ('k'):
 
-		pass
+		kp, kd, ki = input("Enter kp, kd, and ki: \n").split()
+		controller.set_pid_params(kp, kd, ki)
+
+		print(f"\nNew kp: {kp}")
+		print(f"New kd: {kd}")
+		print(f"New ki: {ki} \n")
+
+		controller.read_PID()
+
+		time.sleep(DWELL + 1)
+		menu()
 
 	elif user_cmd.lower() == ('p'):
 
-		#max_vel_old = 
-		#print("Enter new values for max speed and accel").
+		accel, decel, max_v = input("Enter max closed-loop acceleration, closed-loop deceleration, "
+									"and closed-loop velocity: \n").split()
+		controller.set_kinematics_params(accel, decel, max_v)
 
-		pass
+		print(f"\nNew closed-loop max acceleration: {accel}")
+		print(f"New closed-loop max deceleration: {decel}")
+		print(f"New closed-loop max velocity: {max_v} \n")
+
+		time.sleep(DWELL + 2)
+		menu()
 
 
 	elif user_cmd.lower() == ('b'):
