@@ -1,0 +1,70 @@
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- responsive web page -->
+        <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/brython@3.11.0/brython.min.js">
+        </script>
+        <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/brython@3.11.0/brython_stdlib.js">
+        </script>
+        <title>NURC Lacrosse Robot Homepage</title>
+    </head>
+
+    <style>
+        *{
+            font-family: sans-serif;
+            font-weight: normal;
+            font-size: 1.1em;
+            border-spacing: 15px 15px;   # horizontal from left vertical, eventually size to iphone 14
+        }
+        td{
+            background-color: #D9D9D9;
+            padding: 10px 35px 10px 35px;
+            border-radius: 0.2em;
+            text-align: center;
+            cursor: default;
+        }
+        #heading{
+            background-color: #673B9E;
+            font-family: sans-serif;
+            font-weight: normal;
+            font-size: 5vw;
+            padding: 10px 0px 10px 0px;
+            text-align: center;
+            cursor: default;
+        }
+        #stop{
+            background-color: #FF4242;
+            padding: 10px 35px 10px 35px;
+            border-radius: 0.2em;
+            text-align: center;
+            cursor: default;
+        }
+        </style>
+
+    <body onload="brython()">
+    
+        <div id="heading">
+            <h1 style="color:white;"> NURC Lacrosse Homepage</h1>
+        </div>
+
+        <img src="goal_plot.png" alt="goal with plotted markers">
+
+    <script type="text/python">
+    from browser import document, html
+
+    homepage = html.TABLE()
+    homepage <= html.TR(html.TD("Turn Robot On"))
+    homepage <= html.TR(html.TD("Homing Sequence"))
+    homepage <= html.TR(html.TD("Emergency Stop", id="stop"))
+
+    document <= homepage
+
+    </script>
+    
+    
+    </body>
+    
+    </html>

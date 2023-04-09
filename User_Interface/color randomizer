@@ -1,0 +1,15 @@
+import random
+import numpy as np
+
+
+xpoints = np.array([0, 0.5])
+
+for i in range(len(xpoints)):
+
+    # Generating a random number in between 0 and 2^24
+    color = random.randrange(0, 2**24)
+    # Converting that number from base-10 (decimal) to base-16 (hexadecimal)
+    hex_color = hex(color)
+    # Converting hex (0x000000) to useable structure (#000000)
+    std_color = "#" + hex_color[2:]
+    print(std_color)
