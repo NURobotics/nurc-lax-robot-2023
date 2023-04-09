@@ -110,6 +110,11 @@ CL_MAX_ACCEL = "^MAC" #CL = closed-loop
 CL_MAX_DECEL = "^MDEC"
 CL_MAX_VEL = "^MVEL"
 
+#read commands
+READ_KP = "~KP"
+READ_KI = "~KI"
+READ_KD = "~KD"
+
 #echo back motor mode - testing this out
 READ_MMODE = "~MMOD"
 READ_MVEL  = "~MVEL"

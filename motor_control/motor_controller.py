@@ -18,7 +18,6 @@ class Controller(RoboteqHandler):
         self.encoder_cpr = 1250
         self.MAGIC_SCALAR = 1.73 #to adjust conversion from encoder counts to real-world posn
 
-
     def read_curr_state(self):
         '''Read all relevant values from the Roboteq at once. Depending on baud rate,
         this may be a time-consuming operation - check later to see if it needs to be 
@@ -80,16 +79,35 @@ class Controller(RoboteqHandler):
         #assume initial position is at 0, so dx = x and dy = y
         return (dx, dy)
         
-def set_pid_params(kp, ki, kd):
-    '''Sets gains for PID control all at once.'''
-    controller.send_command(cmds.KP, kp)
-    controller.send_command(cmds.KI, ki)
-    controller.send_command(cmds.KD, kd)
+    def set_pid_params(self, kp, kd, ki):
+        '''Sets gains for PID control all at once.'''
+        self.send_command(cmds.KP, kp, 1)
+        self.send_command(cmds.KD, kd, 1)
+        self.send_command(cmds.KI, ki, 1)
 
-def set_kinematics_params():
-    #accel, decel, max velocity, rpms at max speed
-    pass
+        self.send_command(cmds.KP, kp, 2)
+        self.send_command(cmds.KD, kd, 2)
+        self.send_command(cmds.KI, ki, 2)
 
+    def set_kinematics_params(self, accel, decel, max_v):
+        #accel, decel, max velocity, rpms at max speed
+        self.send_command(cmds.CL_MAX_ACCEL, accel, 1)
+        self.send_command(cmds.CL_MAX_DECEL, decel, 1)
+        self.send_command(cmds.CL_MAX_VEL, max_v, 1)
+
+        self.send_command(cmds.CL_MAX_ACCEL, accel, 2)
+        self.send_command(cmds.CL_MAX_DECEL, decel, 2)
+        self.send_command(cmds.CL_MAX_VEL, max_v, 2)
+
+    def read_PID(self):
+
+        self.read_value(cmds.READ_KP, 1)
+        self.read_value(cmds.READ_KI, 1)
+        self.read_value(cmds.READ_KD, 1)
+
+        self.read_value(cmds.READ_KP, 2)
+        self.read_value(cmds.READ_KI, 2)
+        self.read_value(cmds.READ_KD, 2)
 
     #init_coords = (0,0) #change based on actual posns read by encoders
     #deltax, deltay = [coord[i] - init_coords[i] for i in range(len(coord))]
@@ -104,7 +122,6 @@ def set_kinematics_params():
     #delta_m2 = delta_m2_lin / pulley_rad
 
     #return (delta_m1, delta_m2)
-
 
 #def gen_array_speed_cmds():
 #    #check if position can be controlled by roboteq before doing this
