@@ -12,6 +12,13 @@ curr_dir = os.path.dirname(os.getcwd())
 new_dir = curr_dir + '\\motor_control\\python_gui\\code'
 sys.path.append(new_dir)
 
+
+
+
+#TESTING - GIT HISTORY
+
+
+
 from GUI import GUI, init_gui
 from geometry import win_height, win_width
 
