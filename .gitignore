@@ -7,3 +7,4 @@ python_gui/.vs/*
 python_gui/code/.vs/*
 *.pyc
 *.suo
+.DS_Store
