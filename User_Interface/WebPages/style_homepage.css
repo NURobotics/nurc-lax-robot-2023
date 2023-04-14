@@ -1,0 +1,136 @@
+body {
+    background-color: white;
+    font-family: 'Raleway', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  #banner {
+    background-color:  #673B9E;
+    background-size: cover;
+    background-position: bottom center;
+    height: 150px;
+    width: 300 px%;
+  }
+  
+  #banner .content h1 {
+    position: absolute;
+    top: 50px;
+    width: 400px;
+    margin: 0 auto;
+    text-align: left;
+    padding-left: 100px;
+  }
+
+  #banner .content img {
+    position: absolute;
+    height: 100px;
+    padding: 20px;
+  }
+  
+  .buttons {
+    padding: 0px 0px;
+    margin: 0 auto;
+    position: relative;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .buttons #stop {
+    background-color: #FF4242;
+  }
+
+  .buttons #stop:hover {
+    background: #ce3636;
+  }
+
+  .buttons a {
+    background: rgb(208, 203, 211);
+    border-radius: 10px;
+    color: black;
+    display: block;
+    margin: 20px auto;
+    padding: 14px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 20px
+  }
+  
+  .buttons a:hover {
+    background: rgb(133, 133, 133);
+    color: black;
+  }
+
+  #main {
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    width: 400px;
+    height: 610px;
+    overflow: scroll;
+  }
+  
+  h1 {
+    color: white;
+    font-size: 42px;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  h2 {
+    border: 1px dotted red;
+    color: red;
+    font-size: 14px;
+    line-height: 48px;
+    padding: 20px 30px;
+    margin: 30px 20px;
+    text-align: center;
+  }
+  
+  h3 {
+    color: red;
+    font-size: 26px;
+    font-weight: 700;
+    padding: 20px 10px;
+  }
+  
+  p {
+    color: grey;
+    font-size: 16px;
+    line-height: 48px;
+    margin-top: 60px;
+    padding: 10px 20px;
+  }
+  
+  
+  .navigation {
+    background-color: black;
+    /* border: 1px solid LightGrey; */
+    padding: 20px 0px;
+    position: fixed;
+    bottom: 0;
+    text-align: center;
+    width: 100%;
+    font-weight: bold;
+    /* height: 100px; */
+  }
+  
+  .navigation a {
+    /* background: #673B9E; */
+    /* border: 1px solid  #673B9E; */
+    border-radius: 3px;
+    color: white;
+    display: inline-block;
+    margin: 10px;
+    padding: 14px;
+    text-decoration: none;
+  }
+  
+  .navigation img {
+    height: 80px;
+  }
+  .navigation a:hover {
+    /* background: white; */
+    /* border: 1px solid white; */
+    color:  #673B9E;
+  }

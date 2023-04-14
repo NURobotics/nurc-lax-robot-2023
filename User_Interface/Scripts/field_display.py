@@ -4,7 +4,7 @@ import random
 
 plt.rcParams["figure.figsize"] = [3.50, 7.0]   # default size from copied code, manipulate for iphone14 later
 plt.rcParams["figure.autolayout"] = True
-im = plt.imread("/Users/emilygordon/NURC/media/lax_field.png") # this path likely needs to change for host computer
+im = plt.imread("/Users/emilygordon/NURC/nurc-lax-robot-2023/User_Interface/media/lax_field.png") # this path likely needs to change for host computer
 fig, ax = plt.subplots()
 ax.xaxis.set_tick_params(labelbottom=False)
 ax.yaxis.set_tick_params(labelleft=False)
