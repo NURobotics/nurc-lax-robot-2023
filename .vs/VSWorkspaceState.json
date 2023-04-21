@@ -3,11 +3,11 @@
     "",
     "\\motor_control",
     "\\motor_control\\PyRoboteq",
-    "\\motor_control\\USB game controller",
-    "\\PyRoboteq",
-    "\\PyRoboteq\\examples",
-    "\\Testing"
+    "\\motor_control\\python_gui",
+    "\\motor_control\\python_gui\\code",
+    "\\motor_control\\python_gui\\media",
+    "\\motor_control\\USB game controller"
   ],
-  "SelectedNode": "\\motor_control\\PyRoboteq\\roboteq_commands.py",
+  "SelectedNode": "\\motor_control\\motor_control_gui.py",
   "PreviewInSolutionExplorer": false
 }
