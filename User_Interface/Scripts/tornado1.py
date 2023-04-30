@@ -1,5 +1,5 @@
 import tornado
-import tornado.web
+# import tornado.web
 import tornado.websocket
 import tornado.ioloop
 import base64
