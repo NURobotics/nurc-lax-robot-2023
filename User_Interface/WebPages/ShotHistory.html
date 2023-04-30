@@ -21,19 +21,51 @@
   <div id="banner">
     <div class="content">
       <img src="/Media/NU_logo.png">
-      <h1>Lacrosse</h1>
+      <h1>Women's Lacrosse</h1>
     </div>
   </div>
 
   <div id="main" class="content">
     <div class="goal_plot">
-      <img src="/Media/lax_net_fullgrid.png" alt="lacrosse goal">
+      <img id="lax_goal" src="/Media/lax_net_fullgrid.png" alt="lacrosse goal">
     </div>
 
     <div class="field_plot">
-      <img src="/Media/lax_field.png" alt="lacrosse field">
+      <img id="lax_field" src="/Media/lax_field.png" alt="lacrosse field">
     </div>
   </div>
+
+
+  <script>
+    // Create a new WebSocket object
+    const socket = new WebSocket('ws://localhost:8888/websocket');
+
+    // When the socket is open
+    socket.addEventListener('open', (event) => {
+        console.log('WebSocket is open.');
+
+        // Send a message to the server to request the PNG image
+        socket.send('get-png-image');
+    });
+
+    // When the socket receives a message
+    socket.addEventListener('message', (event) => {
+        console.log('WebSocket message received.');
+
+        // Set the source of the image with id "myimage" to the received PNG image data
+        const laxGoal = document.getElementById('lax_goal');
+        laxGoal.src = 'data:image/png;base64,' + event.data;
+
+        const laxField = document.getElementById('lax_field');
+        laxField.src = 'data:image/png;base64,' + event.data;
+    });
+
+    // When the socket is closed
+    socket.addEventListener('close', (event) => {
+        console.log('WebSocket is closed.');
+    });
+</script>
+
 
   <div id="shot_info">
 
