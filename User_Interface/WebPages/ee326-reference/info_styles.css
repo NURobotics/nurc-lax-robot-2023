@@ -1,0 +1,46 @@
+.bio_div {
+    width: 100%;
+    display: flex;
+    background-color: skyblue;
+    margin: 0;
+}
+
+.header {
+    width = 80%;
+    margin-left: auto;
+    margin-right: auto;
+    color: red;
+}
+
+.bio_pic {
+    width: 45%;
+    /*margin-left: 20%;
+    margin-right: 20%;
+    padding: 10px; 
+    */
+    flex:45%;
+    object-fit: contain;
+}
+
+
+.bio_text {
+    flex:55%;
+    text-align: center;
+    object-fit: contain;
+    width= 55%;
+}
+
+#bios {
+    text-align: center;
+    font-family: monospace;
+    font-size: 2.5vw;
+    overflow: visible;
+}
+
+.title_text {
+    text-align:center;
+    font-size: 200%;
+    font-family: monospace;
+    font: "optima";
+    background-color: coral;
+}

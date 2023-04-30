@@ -4,7 +4,7 @@ import random
 
 plt.rcParams["figure.figsize"] = [7.00, 3.50]   # default size from copied code, manipulate for iphone14 later
 plt.rcParams["figure.autolayout"] = True
-im = plt.imread("/Users/emilygordon/NURC/nurc-lax-robot-2023/User_Interface/media/lax_net_nogrid.png") # this path likely needs to change for host computer
+im = plt.imread("/Users/emrekaratas/desktop/lax/nurc-lax-robot-2023/User_Interface/media/lax_net_nogrid.png") # this path likely needs to change for host computer
 fig, ax = plt.subplots()
 ax.xaxis.set_tick_params(labelbottom=False)
 ax.yaxis.set_tick_params(labelleft=False)
@@ -30,4 +30,4 @@ def goal_display(xpoints, ypoints):     # should the function accept arrays or t
     plt.show()
 
 goal_display([0, 0.5, -0.5], [0, 0.5, -0.5])
-fig.savefig('/Users/emilygordon/NURC/nurc-lax-robot-2023/User_Interface/WebPages/goal_plot.png')
+fig.savefig('/Users/emrekaratas/desktop/lax/nurc-lax-robot-2023/User_Interface/WebPages/goal_plot.png')
