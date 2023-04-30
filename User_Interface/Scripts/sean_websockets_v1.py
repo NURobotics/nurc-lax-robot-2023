@@ -1,7 +1,7 @@
-import tornado
-# import tornado.web
+#import tornado.web
 #import tornado.websocket
 #import tornado.ioloop
+import tornado
 import base64
 import io
 from PIL import Image
@@ -9,7 +9,9 @@ from PIL import Image
 # Create a handler for the homepage
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render('/WebPages/ShotHistory.html')
+#        self.render('index.html')
+        self.render('sean_webtest_site.html')
+
 
 # Create a handler for the websocket connection
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
@@ -35,7 +37,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 app = tornado.web.Application([
     (r'/', MainHandler),
     (r'/websocket', WebSocketHandler),
-], WebPage_path='WebPages')
+], template_path='templates')
 
 # Start the Tornado server
 if __name__ == '__main__':
