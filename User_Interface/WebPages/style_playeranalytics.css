@@ -37,6 +37,47 @@ body {
     overflow: scroll;
   }
   
+  tr:nth-child(even) {
+    background-color: rgb(235, 235, 235);
+  }
+
+  .roster {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  #roster_image {
+    width: 15vw;
+  }
+
+  #roster_number {
+    width: 8vw;
+    font-size: 6vw;
+    font-weight: bold;
+    font-style: italic;
+    padding-left: 2vw;
+    /* color: white;
+    background-color:  #673B9E; */
+  }
+
+  mark {
+    background-color: #673B9E;
+    color: white;
+    padding-left: 4vw;
+    padding-right: 5vw;
+    padding-top: 0;
+    padding-bottom: 1.5vw;
+  }
+
+  #roster_name {
+    width: 80vw;
+    text-align: left;
+    font-weight: bold;
+    font-size: 6vw;
+    color: rgb(81, 80, 80);
+    padding-left: 2vw;
+  }
+
   .roster img {
     height: 20vw;
     width: auto;
