@@ -17,7 +17,9 @@ function doConnect() { // makes a connection and defines callbacks
 	if (b.innerText == "Start Webcam") {
 		writeToScreen("Connecting to ws://" + localhost + ":81/ ...");
 		b.disabled = true;
-		websocket = new WebSocket("ws://" + localhost + ":81/");
+		//websocket = new WebSocket("ws://" + localhost + ":81/");
+        websocket = new WebSocket("ws://localhost:81/ws");
+
 		websocket.onopen = function(evt) {
 			onOpen(evt)
 		};

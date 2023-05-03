@@ -2,19 +2,26 @@
 #import tornado.websocket
 #import tornado.ioloop
 import tornado
+from tornado.web import RequestHandler
+from tornado.websocket import WebSocketHandler
 import base64
 import io
 from PIL import Image
 
 # Create a handler for the homepage
-class MainHandler(tornado.web.RequestHandler):
+class MainHandler(RequestHandler):
     def get(self):
 #        self.render('index.html')
         self.render('sean_webtest_site.html')
 
 
 # Create a handler for the websocket connection
-class WebSocketHandler(tornado.websocket.WebSocketHandler):
+#class WebSocketHandler(tornado.websocket.WebSocketHandler):
+class WebSocketHandlerInherited(WebSocketHandler):
+
+    def check_origin(self, origin):
+        return True
+
     def open(self):
         print('WebSocket opened')
 
@@ -36,7 +43,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 # Create a Tornado application
 app = tornado.web.Application([
     (r'/', MainHandler),
-    (r'/websocket', WebSocketHandler),
+    (r'/websocket', WebSocketHandlerInherited),
 ], template_path='templates')
 
 # Start the Tornado server

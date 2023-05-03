@@ -1,3 +1,5 @@
+//static 
+
 var websocket = null;
 var localhost = "";
 
@@ -8,8 +10,9 @@ function init() {
 	}
     
     writeToScreen("Connecting to ws://" + localhost + ":81/ ...");
-    b.disabled = true;
-    websocket = new WebSocket("ws://" + localhost + ":81/");
+//    websocket = new WebSocket("ws://" + localhost + ":81/");
+    websocket = new WebSocket("ws://localhost:81/ws"); //see: r/ws in py script. need to hit the right endpoint in order for the handshake to work
+    
     websocket.onopen = function(evt) {
         onOpen(evt)
     };
@@ -21,7 +24,7 @@ function init() {
     };
     websocket.onerror = function(evt) {
         onError(evt)
-
+    }
 }
 
 function onOpen(evt) { // when handshake is complete:

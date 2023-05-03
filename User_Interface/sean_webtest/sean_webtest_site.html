@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>EE326 WEBCAM</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--        <link rel="stylesheet" type"text/css" href="webcam_styles.css">-->
+        <!--<link rel="stylesheet" href="main.css"-->
+    </head>
+    <body>
+
+<!--
+        Navigation bar for getting to other pages on site 
+        <a class="header" href="index.html">Homepage</a> |
+        <a class="header" href="webcam.html">Webcam</a> |
+        <a class="header" href="info.html">Info</a> |
+-->
+        <a class="header" href="/edit" target="_blank">File Editor</a>
+        
+
+    <h1 class="title_text">
+        Test Webcam Page
+    </h1>
+
+   
+    <img class="video_zone" id="goal_image" alt="My webcam image" width="640" height="480">
+   
+    <h3>Log</h3>
+   
+    <textarea class="video_zone" id="msg" rows="20" cols="50">&nbsp;</textarea>
+    
+<!--    <script src="sean_websockets_v1.js"></script>-->
+    <script src="{{ static_url('sean_websockets_v1.js') }}" type="text/javascript"></script>
+
+<!--
+    <script>
+        var websocket = null;
+        var localhost = "";
+
+        // Initialize the websocket
+        function init() {
+            if(window.location.hostname != "") {
+                localhost = window.location.hostname;
+            }
+
+            writeToScreen("Connecting to ws://" + localhost + ":81/ ...");
+        //    websocket = new WebSocket("ws://" + localhost + ":81/");
+            websocket = new WebSocket("ws://" + localhost + ":81/ws"); //see: r/ws in py script. need to hit the right endpoint in order for the handshake to work
+
+            websocket.onopen = function(evt) {
+                onOpen(evt)
+            };
+            websocket.onclose = function(evt) {
+                onClose(evt)
+            };
+            websocket.onmessage = function(evt) {
+                onMessage(evt)
+            };
+            websocket.onerror = function(evt) {
+                onError(evt)
+            }
+        }
+
+        function onOpen(evt) { // when handshake is complete:
+            writeToScreen("Connected.");
+        }
+
+        function onClose(evt) { // when socket is closed:
+            writeToScreen("Disconnected. Error: " + evt);    
+        }
+
+        function onMessage(msg) {
+            //previously: was used to take data sent from the webcam and plot the image
+
+            // Get the image just taken from WiFi chip's RAM.
+            var image = document.getElementById('goal_image');
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img_test = new Image();
+                img_test.onload = function(){image.src = e.target.result;};
+                img_test.onerror = function(){;};
+                img_test.src = e.target.result;
+            };
+            reader.readAsDataURL(msg.data);
+        }
+
+        function onError(evt) { // when an error occurs
+            websocket.close();
+            writeToScreen("Websocket error");
+        }
+
+
+        // Function to display to the message box
+         function writeToScreen(message)
+          {
+            document.getElementById("msg").innerHTML += message + "\n";
+            document.getElementById("msg").scrollTop = document.getElementById("msg").scrollHeight;
+          }
+
+        // Open Websocket as soon as page loads
+        window.addEventListener("load", init, false);
+
+        
+    </script>
+-->
+        
+        
+    </body>
+</html>
+

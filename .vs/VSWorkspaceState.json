@@ -1,15 +1,11 @@
 {
   "ExpandedNodes": [
     "",
-    "\\detection",
     "\\detection\\number_recog_test",
-    "\\motor_control",
-    "\\motor_control\\PyRoboteq",
-    "\\motor_control\\USB game controller",
     "\\User_Interface",
     "\\User_Interface\\Scripts",
     "\\User_Interface\\WebPages"
   ],
-  "SelectedNode": "\\User_Interface\\Scripts\\gpt_websockets_demo2.py",
+  "SelectedNode": "\\User_Interface\\Scripts\\sean_websockets_v1.py",
   "PreviewInSolutionExplorer": false
 }
