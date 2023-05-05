@@ -37,8 +37,16 @@ body {
     overflow: scroll;
   }
   
-  tr:nth-child(even) {
+  .player-overview:nth-of-type(4n-1) {
     background-color: rgb(235, 235, 235);
+  }
+
+  .player-data-info:nth-of-type(4n) {
+    background-color: rgb(235, 235, 235);
+  }
+  
+  #player-data-info {
+    height:15vw;
   }
 
   .roster {
@@ -92,6 +100,10 @@ body {
   .player {
     width: 100vw;
     height: 20px;
+  }
+
+  .hidden {
+    display: none;
   }
 
   .goal_plot img {
