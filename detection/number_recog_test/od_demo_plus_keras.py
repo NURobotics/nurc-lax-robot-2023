@@ -5,13 +5,8 @@ from PIL import Image
 import numpy as np
 
 import os
-import time
-import random
-import cv2 as cv
 import pandas as pd
 import matplotlib.pyplot as plt
-from tqdm import tqdm
-from sklearn.utils import class_weight
 
 def extract_player_jersey(img, display=False):
     '''

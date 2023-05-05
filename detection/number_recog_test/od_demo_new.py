@@ -72,7 +72,10 @@ if __name__ == '__main__':
 
         # Show the frame with detected objects
         cv2.imshow("Object Detection", frame)
-        cv2.imshow("Edited",np.array(object_image))
+        try:
+            cv2.imshow("Edited",np.array(object_image))
+        except:
+            pass
 
         # Press 'q' to quit
         if cv2.waitKey(1) & 0xFF == ord("q"):

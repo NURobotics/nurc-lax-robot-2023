@@ -12,3 +12,5 @@ python_gui/code/.vs/*
 **\.vs\*
 *.pb
 *.pbtxt
+User_Interface/sean_webtest/.vs/ProjectSettings.json
+User_Interface/sean_webtest/.vs/slnx.sqlite

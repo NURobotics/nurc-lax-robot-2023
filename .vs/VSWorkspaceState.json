@@ -1,13 +1,11 @@
 {
   "ExpandedNodes": [
     "",
-    "\\motor_control",
-    "\\motor_control\\PyRoboteq",
-    "\\motor_control\\python_gui",
-    "\\motor_control\\python_gui\\code",
-    "\\motor_control\\python_gui\\media",
-    "\\motor_control\\USB game controller"
+    "\\detection\\number_recog_test",
+    "\\User_Interface",
+    "\\User_Interface\\Scripts",
+    "\\User_Interface\\WebPages"
   ],
-  "SelectedNode": "\\motor_control\\motor_control_gui.py",
+  "SelectedNode": "\\User_Interface\\Scripts\\sean_websockets_v1.py",
   "PreviewInSolutionExplorer": false
 }
