@@ -6,7 +6,7 @@ import numpy as np
 
 import os
 import pandas as pd
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt 
 
 def extract_player_jersey(img, display=False):
     '''
@@ -43,7 +43,7 @@ def extract_player_jersey(img, display=False):
     prediction_data = {"label": predicted_jersey_number,
                             "confidence":jersey_confidence}
     if display:
-        print(predicted_player_code, jersey_confidence)
+        print(predicted_jersey_number, jersey_confidence)
         plt.imshow(jersey_box)
         plt.show()
     
