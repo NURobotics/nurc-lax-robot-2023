@@ -48,7 +48,16 @@ class MyWebSocketHandler(WebSocketHandler):
         #self.write_message("test")
 
     def on_message(self, message):
-        pass
+
+        #decode the message, if needed
+
+        #interpret the different commands that the website can send
+        if msg == 'emergency_stop':
+            pass
+        elif msg == 'home':
+            pass
+        elif msg == 'turn_on':
+            pass
 
     def on_close(self):
         print("WebSocket closed")
