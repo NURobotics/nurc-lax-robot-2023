@@ -67,7 +67,7 @@ class MyWebSocketHandler(WebSocketHandler):
 class MainHandler(RequestHandler):
     def get(self):
         #self.render("index.html")
-        self.render("sean_webtest_site.html")
+        self.render("tornado_env_site.html")
 
 # Create the application with WebSocket and Web handlers
 
