@@ -19,6 +19,7 @@ import base64
 import time
 from PIL import Image
 import os
+import io
 from io import BytesIO
 
 address = 81
@@ -27,6 +28,7 @@ address = 81
 def generate_image():
     # Replace this with your own image generation code
     # Here, we're generating a random image using Pillow (PIL)
+    ### Debug this so that it can sent a random image
     img = Image.new('RGB', (100, 100), color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
     buffered = BytesIO()
     img.save(buffered, format="JPEG")
@@ -40,11 +42,22 @@ class MyWebSocketHandler(WebSocketHandler):
         # Start a periodic callback to send an image every second
         self.callback = PeriodicCallback(self.send_image, 1000)
         self.callback.start()
-
+#Emre:
+#'/Users/emrekaratas/Desktop/Lax/nurc-lax-robot-2023/User_Interface/WebPages/field_plot.png'
+#Emily:
+#'/Users/emilygordon/NURC/nurc-lax-robot-2023/User_Interface/WebPages/field_plot.png'
     def send_image(self):
-        image_data = generate_image()
+        img_path = '/Users/emrekaratas/Desktop/Lax/nurc-lax-robot-2023/User_Interface/WebPages/field_plot.png'
+        image = Image.open(img_path)
+        image = image.convert("RGB")
+
+        byte_stream = io.BytesIO()
+        image.save(byte_stream, format='JPEG')
+        byte_stream.seek(0)
+        #image_data = generate_image()
+        #image_data = image
         #print("Executing periodic function")
-        self.write_message(image_data)
+        self.write_message(byte_stream.getvalue(), binary=True)
         #self.write_message("test")
 
     def on_message(self, message):
@@ -53,7 +66,7 @@ class MyWebSocketHandler(WebSocketHandler):
     def on_close(self):
         print("WebSocket closed")
         self.callback.stop()
-
+ 
 # Web server handler
 class MainHandler(RequestHandler):
     def get(self):
@@ -63,18 +76,24 @@ class MainHandler(RequestHandler):
 # Create the application with WebSocket and Web handlers
 
 # Start the server
-if __name__ == "__main__":
+#if __name__ == "__main__":
 
-    settings = {
-        "static_path": os.path.join(os.path.dirname(__file__), "staticpath_folder"),        
-    }
-    #need to do this static url stuff for style sheets too
+settings = {
+    "static_path": os.path.join(os.path.dirname(__file__), "staticpath_folder"),        
+}
+#need to do this static url stuff for style sheets too
 
-    #app = Application([(r"/", MainHandler), (r"/ws", MyWebSocketHandler)],settings = settings)
-    app = Application([(r"/", MainHandler), (r"/ws", MyWebSocketHandler)],**settings)
+#app = Application([(r"/", MainHandler), (r"/ws", MyWebSocketHandler)],settings = settings)
+app = Application([(r"/", MainHandler), (r"/ws", MyWebSocketHandler)],**settings)
 
-    #app = tornado.web.Application(settings=settings, **kwargs)
-    app.listen(address)
+#app = tornado.web.Application(settings=settings, **kwargs)
+app.listen(address)
 
-    print(f"Server started on http://localhost:{address}")
-    IOLoop.current().start()
+print(f"Server started on http://localhost:{address}")
+IOLoop.current().start()
+
+#current_directory = os.getcwd()
+#file_path = os.path.join(current_directory, "field_plot.png")
+#print(file_path)
+
+#Image.open('/Users/emrekaratas/Desktop/Lax/nurc-lax-robot-2023/User_Interface/WebPages/field_plot.png')
