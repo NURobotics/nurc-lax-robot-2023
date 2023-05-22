@@ -368,6 +368,19 @@ while not has_quit:
 		time.sleep(DWELL + 1)
 		menu()
 
+	elif user_cmd.lower() == 'a':
+
+		pid = controller.read_PID()
+
+		kp = pid[0][0]
+		ki = pid[1][0]
+		kd = pid[2][0]
+
+		print(f"Current Kp = {kp} \nCurrent Ki = {ki} \n Current Kd = {kd}")
+
+		time.sleep(DWELL)
+		menu()
+
 	elif user_cmd.lower() == ('p'):
 
 		accel, decel, max_v = input("Enter max closed-loop acceleration, closed-loop deceleration, "

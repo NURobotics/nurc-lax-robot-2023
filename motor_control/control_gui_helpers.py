@@ -17,7 +17,7 @@ menu_text = \
 	'1234 keys: move diagonally, UR/DL/UL/DR \n\n' + \
 	'e: read encoder counts \t\tf: read world coords  \t\th: set current posn as home \n' + \
 	'u: set closed/open loop state \ti: get closed/open loop state  \tz: go to zero position \n' + \
-	'r: go to encoder counts \tt: go to real-world posn \tk: send new Kp, Ki, Kd\n' + \
+	'r: go to encoder counts \tt: go to real-world posn \tk: send new Kp, Ki, Kd\n' + 'a: read PID parameters\n'+ \
 	'm: get open-loop drive speed \tn: set open-loop drive speed \tl: game controller mode \n' + \
 	'b: send raw serial cmds \tp: set max closed-loop speed and accel\n' + \
 	'g: visual GUI (closed-loop position) \n' + \
