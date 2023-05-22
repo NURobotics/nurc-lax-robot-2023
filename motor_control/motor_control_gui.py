@@ -12,8 +12,7 @@ curr_dir = os.path.dirname(os.getcwd())
 new_dir = curr_dir + '\\motor_control\\python_gui\\code'
 sys.path.append(new_dir)
 
-from python_gui.code.GUI import GUI, init_gui
-from python_gui.code.geometry import win_height, win_width
+
 
 #------------------------------------------------#
 
@@ -421,6 +420,10 @@ while not has_quit:
 
 	elif user_cmd.lower() == ('g'):
 
+
+		from python_gui.code.GUI import GUI, init_gui
+		from python_gui.code.geometry import win_height, win_width
+		
 		if motor_mode != 3:
 			print("\nSet Roboteq to Closed Loop Count Position first; will not execute.\n\n")
 		else:
