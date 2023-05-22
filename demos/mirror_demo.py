@@ -63,7 +63,7 @@ def isfloat(num):
 controller = Controller(debug_mode = False, exit_on_interrupt = False)  # Create the controller object
 is_connected = controller.connect("/dev/tty.usbmodemC13E847AFFFF1") # connect to the controller (COM9 for windows, /dev/tty/something for Linux)
 
-# Set motor to closed loop mode
+# Set motor to closed loop count position mode
 motor_mode = 3
 controller.send_command(cmds.MOTOR_MODE, motor_mode)
 
