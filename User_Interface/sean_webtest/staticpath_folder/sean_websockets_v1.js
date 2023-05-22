@@ -35,9 +35,31 @@ function onClose(evt) { // when socket is closed:
     writeToScreen("Disconnected. Error: " + evt);    
 }
 
+/* function onMessage(msg) {
+    var byteArray = new Uint8Array(msg.data);
+
+    var blob = new Blob([byteArray], {type: 'image/jpeg'});
+
+    // Get the image just taken from WiFi chip's RAM.
+    var image = document.getElementById('goal_image');
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        image.src = e.target.result;
+    };
+    reader.readAsDataURL(blob);
+} */
+
 function onMessage(msg) {
     //previously: was used to take data sent from the webcam and plot the image
-    
+    var byteCharacters = atob(msg.data);
+    var byteNumbers = new Array(byteCharacters.length);
+    for (var i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    var byteArray = new Uint8Array(byteNumbers);
+
+    var blob = new Blob([byteArray], {type: 'image/jpeg'});
+
     // Get the image just taken from WiFi chip's RAM.
 	var image = document.getElementById('goal_image');
 	var reader = new FileReader();
@@ -47,7 +69,7 @@ function onMessage(msg) {
 		img_test.onerror = function(){;};
 		img_test.src = e.target.result;
 	};
-	reader.readAsDataURL(msg.data);
+	reader.readAsDataURL(blob);
 }
 
 function onError(evt) { // when an error occurs
