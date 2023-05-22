@@ -261,7 +261,7 @@ while not has_quit:
 			if 'y'.__eq__(decision.lower()):
 				print("\nSetting encoder counts.\n\n")
 				#controller.send_command(cmds.MOT_POS, 1, enc1)
-				#controller.send_command(cmds.MOT_POS, 2, enc2)
+				#controller.send_command(cmds.MOT_POS, 2, enc2)``
 				#controller.send_command(cmds.MOT_POS, 1, enc1)
 				#controller.send_command(cmds.NXT_POS, 2, enc2)
 				cmd = f"!P 1 {enc1} _!P 2 {enc2} "

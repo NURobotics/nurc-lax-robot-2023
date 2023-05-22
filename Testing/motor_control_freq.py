@@ -42,15 +42,15 @@ timearray = []
 theta = np.arange(0,2*np.pi,0.01)
 
 for i in theta:
-    Xarray.append(0.1*np.cos(i))
-    Yarray.append(0.1*np.sin(i))
+    Xarray.append(0.3*np.cos(i))
+    Yarray.append(0.3*np.sin(i))
 
 abscntr_1  = (controller.read_value(cmds.READ_ABSCNTR, 1))      # Read encoder counter absolute
 abscntr_2  = (controller.read_value(cmds.READ_ABSCNTR, 2))      # Read encoder counter absolute
 print(f"\nEncoder counts: \nENC1: {abscntr_1} \nENC2: {abscntr_2} \n\n")
 var1 = input("Proceed? (y/n):\n")
 
-if(var1 == "N"):
+if(var1 == "n"):
     exit()
 
 print("Moving to origin...\n")
