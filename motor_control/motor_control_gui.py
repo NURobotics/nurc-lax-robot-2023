@@ -247,9 +247,9 @@ while not has_quit:
 				y_raw = input("y (m): ")
 
 				if (isfloat(x_raw) and isfloat(y_raw)):
-					(x, y) = (float(x_raw), float(y_raw))
-					(enc1, enc2) = controller.convert_worldspace_to_encoder_cts(x, y)
-					(enc1, enc2) = (round(enc1), round(enc2))
+					(x, y) = (float(x_raw), float(y_raw)) 
+					(enc1, enc2) = controller.convert_worldspace_to_encoder_cts(x, y) # IMMPORTANT
+					(enc1, enc2) = (round(enc1), round(enc2)) # Important
 
 					print(f"\nEncoder counts calculated to go to: \nENC1: {enc1} \nENC2: {enc2}")
 					break
@@ -264,8 +264,8 @@ while not has_quit:
 				#controller.send_command(cmds.MOT_POS, 2, enc2)``
 				#controller.send_command(cmds.MOT_POS, 1, enc1)
 				#controller.send_command(cmds.NXT_POS, 2, enc2)
-				cmd = f"!P 1 {enc1} _!P 2 {enc2} "
-				result = controller.request_handler(cmd) #send_raw_command works the same; this grabs returned data
+				cmd = f"!P 1 {enc1} _!P 2 {enc2} " # Important
+				result = controller.request_handler(cmd) #send_raw_command works the same; this grabs returned data # Important
 				print(result)
 
 		time.sleep(DWELL)
