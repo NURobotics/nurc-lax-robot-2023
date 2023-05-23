@@ -61,7 +61,16 @@ class MyWebSocketHandler(WebSocketHandler):
         #self.write_message("test")
 
     def on_message(self, message):
-        pass
+
+        #decode the message, if needed
+
+        #interpret the different commands that the website can send
+        if msg == 'emergency_stop':
+            pass
+        elif msg == 'home':
+            pass
+        elif msg == 'turn_on':
+            pass
 
     def on_close(self):
         print("WebSocket closed")
@@ -71,7 +80,7 @@ class MyWebSocketHandler(WebSocketHandler):
 class MainHandler(RequestHandler):
     def get(self):
         #self.render("index.html")
-        self.render("sean_webtest_site.html")
+        self.render("tornado_env_site.html")
 
 # Create the application with WebSocket and Web handlers
 

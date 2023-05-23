@@ -12,8 +12,7 @@ curr_dir = os.path.dirname(os.getcwd())
 new_dir = curr_dir + '\\motor_control\\python_gui\\code'
 sys.path.append(new_dir)
 
-from python_gui.code.GUI import GUI, init_gui
-from python_gui.code.geometry import win_height, win_width
+
 
 #------------------------------------------------#
 
@@ -248,9 +247,9 @@ while not has_quit:
 				y_raw = input("y (m): ")
 
 				if (isfloat(x_raw) and isfloat(y_raw)):
-					(x, y) = (float(x_raw), float(y_raw))
-					(enc1, enc2) = controller.convert_worldspace_to_encoder_cts(x, y)
-					(enc1, enc2) = (round(enc1), round(enc2))
+					(x, y) = (float(x_raw), float(y_raw)) 
+					(enc1, enc2) = controller.convert_worldspace_to_encoder_cts(x, y) # IMMPORTANT
+					(enc1, enc2) = (round(enc1), round(enc2)) # Important
 
 					print(f"\nEncoder counts calculated to go to: \nENC1: {enc1} \nENC2: {enc2}")
 					break
@@ -262,11 +261,11 @@ while not has_quit:
 			if 'y'.__eq__(decision.lower()):
 				print("\nSetting encoder counts.\n\n")
 				#controller.send_command(cmds.MOT_POS, 1, enc1)
-				#controller.send_command(cmds.MOT_POS, 2, enc2)
+				#controller.send_command(cmds.MOT_POS, 2, enc2)``
 				#controller.send_command(cmds.MOT_POS, 1, enc1)
 				#controller.send_command(cmds.NXT_POS, 2, enc2)
-				cmd = f"!P 1 {enc1} _!P 2 {enc2} "
-				result = controller.request_handler(cmd) #send_raw_command works the same; this grabs returned data
+				cmd = f"!P 1 {enc1} _!P 2 {enc2} " # Important
+				result = controller.request_handler(cmd) #send_raw_command works the same; this grabs returned data # Important
 				print(result)
 
 		time.sleep(DWELL)
@@ -369,6 +368,19 @@ while not has_quit:
 		time.sleep(DWELL + 1)
 		menu()
 
+	elif user_cmd.lower() == 'a':
+
+		pid = controller.read_PID()
+
+		kp = pid[0][0]
+		ki = pid[1][0]
+		kd = pid[2][0]
+
+		print(f"Current Kp = {kp} \nCurrent Ki = {ki} \n Current Kd = {kd}")
+
+		time.sleep(DWELL)
+		menu()
+
 	elif user_cmd.lower() == ('p'):
 
 		accel, decel, max_v = input("Enter max closed-loop acceleration, closed-loop deceleration, "
@@ -421,6 +433,10 @@ while not has_quit:
 
 	elif user_cmd.lower() == ('g'):
 
+
+		from python_gui.code.GUI import GUI, init_gui
+		from python_gui.code.geometry import win_height, win_width
+		
 		if motor_mode != 3:
 			print("\nSet Roboteq to Closed Loop Count Position first; will not execute.\n\n")
 		else:

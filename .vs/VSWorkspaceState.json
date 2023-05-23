@@ -1,11 +1,13 @@
 {
   "ExpandedNodes": [
     "",
-    "\\detection\\number_recog_test",
+    "\\motor_control",
     "\\User_Interface",
     "\\User_Interface\\Scripts",
+    "\\User_Interface\\sean_webtest",
+    "\\User_Interface\\sean_webtest\\staticpath_folder",
     "\\User_Interface\\WebPages"
   ],
-  "SelectedNode": "\\User_Interface\\Scripts\\sean_websockets_v1.py",
+  "SelectedNode": "\\motor_control\\motor_control_gui.py",
   "PreviewInSolutionExplorer": false
 }

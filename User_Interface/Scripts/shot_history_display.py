@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import random
 import time
+import os
 
 plt.ion()   #interactive mode
 
@@ -11,6 +12,16 @@ x_goal_points = []
 y_goal_points = []
 colors = []
 
+def read_img(localpath):
+    '''Reads an image from a place on our PC relative to the current script.
+    '''
+    return plt.imread(os.path.join(os.path.dirname(__file__), localpath))
+
+def save_figure(figure, localpath):
+    '''Saves a figure to a location relative to the current script.
+    '''
+    figure.savefig(os.path.join(os.path.dirname(__file__), localpath))
+
 def plot_field_point(x, y):
     """
     Plots a point with the given (x,y) coordinate on a plot.
@@ -18,7 +29,8 @@ def plot_field_point(x, y):
     """
     plt.rcParams["figure.figsize"] = [7.0, 3.5]   # default size from copied code, manipulate for iphone14 later
     plt.rcParams["figure.autolayout"] = True
-    im = plt.imread("/Users/emilygordon/NURC/nurc-lax-robot-2023/User_Interface/media/lax_field.png") # this path likely needs to change for host computer
+    im = read_img("../media/lax_field.png")
+
     fig, ax = plt.subplots()
     ax.xaxis.set_tick_params(labelbottom=False)
     ax.yaxis.set_tick_params(labelleft=False)
@@ -40,7 +52,7 @@ def plot_field_point(x, y):
     for i in range(len(x_field_points)):
         plt.plot(x_field_points[i], y_field_points[i], marker="o", markersize=13, markeredgewidth=1.5, markeredgecolor="black", markerfacecolor=colors[i], linestyle="None")
     plt.show()
-    fig.savefig('/Users/emilygordon/NURC/nurc-lax-robot-2023/User_Interface/WebPages/field_plot.png')
+    save_figure(fig, '../WebPages/field_plot.png')
     plt.pause(2)
     plt.close()
 
@@ -52,7 +64,7 @@ def plot_goal_point(x, y):
     """
     plt.rcParams["figure.figsize"] = [7.00, 3.50]   # default size from copied code, manipulate for iphone14 later
     plt.rcParams["figure.autolayout"] = True
-    im = plt.imread("/Users/emilygordon/NURC/nurc-lax-robot-2023/User_Interface/media/lax_net_zones.png") # this path likely needs to change for host computer
+    im = read_img("../media/lax_net_zones.png")
     fig, ax = plt.subplots()
     ax.xaxis.set_tick_params(labelbottom=False)
     ax.yaxis.set_tick_params(labelleft=False)
@@ -66,7 +78,7 @@ def plot_goal_point(x, y):
     for i in range(len(x_goal_points)):
         plt.plot(x_goal_points[i], y_goal_points[i], marker="o", markersize=13, markeredgewidth=1.5, markeredgecolor="black", markerfacecolor=colors[i], linestyle="None")
     plt.show()
-    fig.savefig('/Users/emilygordon/NURC/nurc-lax-robot-2023/User_Interface/WebPages/goal_plot.png')
+    save_figure(fig, '../WebPages/goal_plot.png')
     plt.pause(2)
     plt.close()
 
