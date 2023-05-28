@@ -17,7 +17,9 @@ sys.path.append(new_dir)
 #------------------------------------------------#
 
 controller = Controller(debug_mode = False, exit_on_interrupt = False)  # Create the controller object
-is_connected = controller.connect("/dev/tty.usbmodemC13E847AFFFF1")
+#is_connected = controller.connect("/dev/tty.usbmodemC13E847AFFFF1")
+is_connected = controller.connect("COM4")
+
 # connect to the controller:
 # 1) COM9 for windows
 # 2) /dev/tty/.* for Linux/Unix, and find the USB port it's actually connected to using trial/error)

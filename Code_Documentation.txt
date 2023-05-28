@@ -1,0 +1,126 @@
+Northwestern Robotics Club Lacrosse Goaliee Robot Code Documentation
+Written by Samuel Hodge
+5/28/2023
+
+In the github folder "nurc-lax-robot-2023"
+
+demos
+
+	-> mirror_demo.py (Samuel Hodge)
+
+		- Code that takes the X and Y position of the ball and moves the end effector to that position
+		- Did not get this script to function due to closed-loop errors in the Robotech
+
+	-> toss_demo.py (Samuel Hodge)
+
+		- Code that takes the 3D position of the LAX ball, determines when the ball is thrown, calculates velocities, and outputs an expected final position.
+		- Did not get this script to function due to closed-loop errors and difficulty in determining when the ball is being thrown
+
+detection
+
+	-> centroid_tracker.py (Past Member)
+
+		- Legacy code used as a helper to the detection.py code
+		- Not used
+
+	-> colordetec.py (Samuel Hodge)
+
+		- Legacy code used to test color detection
+
+	-> colorfinder.py (Samuel Hodge)
+
+		- Code to determine the best color ranges for the orange LAX ball
+		- Need to use python 2 to run. I use a conda environment on my mac
+
+	-> detection.py (Past Member)
+
+		- Legacy code using neural nets to find the position of the ball in the frame
+		- We switched over to color mask-based detection for ease of coding. Still unsure if the color mask method is robust enough to make final position prediction of the ball.
+		- Code is not in use
+
+	-> visualize_tracking.py (Past Member)
+
+		- Legacy code used in detection.py
+		- Not in use
+
+	number_recog_test (Damien Koh)
+
+		- Code using a neural network to detect the jersey number of a player. 
+		- Not implemented into general code yet, but planning on recording specific player's data for future use.
+		- Contains training data (jpegs of lax game)
+
+	test 
+		-> camera_integration.py (Web)
+
+			- Legacy code to test the camera settings
+			- Used for the optitrack camera only. No longer using that camera. Switched to a Logitech webcam.
+
+		-> set_exposure.py (Web)
+
+			- More code for Optitrack camera. Not in use.
+
+Lax data (Samuel Hodge)
+
+	-> 3D_data_vis.py
+
+		- Code used to find a transformation from the pixel space to the real space. Depends on the position of the camera and the camera's properties.
+		- Also outputs 3D plots of the data for visualization
+
+	- Contains 3D plots and some data
+
+motor_control (Sean Morton)
+
+	-> control_gui_helpers.py
+
+		- Helper functions for the motor_control_gui.py
+	
+	-> motor_control_gui.py
+
+		- Main motor control script for integration with the Roboteq. 
+		- Need to work on closed-loop control. Had it working in the middle of the year. Closed loop stopped working after the Robot crash.
+	
+
+	-> motor_controller.py
+
+		- Class for motor control
+
+	PyRoboteq
+
+		- Codebase for the Roboteq
+		- Required for the gui scripts
+
+	-> pyroboteq_test.py
+
+		- Code for motor control testing
+
+	python_gui
+
+		- More code for the gui scripts
+		- Creates the gui visualization
+	
+	USB game controller
+		
+		- Code to allow a ps4 controller to make the robot move in open-loop mode
+
+Testing
+
+	-> calibrating.py (Donald Carl)
+
+		- Code to set the zero on the encoders to be the centroid of the robot frame using the limit switches.
+
+	-> motor_control_freq.py (Samuel Hodge)
+
+		- Code to test the closed-loop control. Sends the positions of a circle at some sample rate to the Roboteq
+
+	-> test_pins.py (Donald Carl)
+		
+		- Code for the limit switches 
+
+User_Interface (Emily Gordon + Emre Karatas)
+
+	- Code and files to make a website that keeps track of LAX players' data
+
+
+
+
+
