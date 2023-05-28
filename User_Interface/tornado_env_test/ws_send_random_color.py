@@ -48,16 +48,19 @@ class MyWebSocketHandler(WebSocketHandler):
 #'/Users/emilygordon/NURC/nurc-lax-robot-2023/User_Interface/WebPages/field_plot.png'
     def send_image(self):
         img_path = '/Users/emrekaratas/Desktop/Lax/nurc-lax-robot-2023/User_Interface/WebPages/field_plot.png'
+        #img_path = 
         image = Image.open(img_path)
         image = image.convert("RGB")
-
-        byte_stream = io.BytesIO()
+        byte_stream = BytesIO()
         image.save(byte_stream, format='JPEG')
-        byte_stream.seek(0)
+        #byte_stream.seek(0)
         #image_data = generate_image()
+        mac = base64.b64encode(byte_stream.getvalue()).decode()
         #image_data = image
         #print("Executing periodic function")
-        self.write_message(byte_stream.getvalue(), binary=True)
+
+        #self.write_message(q, binary=True)
+        return self.write_message(mac)
         #self.write_message("test")
 
     def on_message(self, message):
@@ -101,8 +104,10 @@ app.listen(address)
 print(f"Server started on http://localhost:{address}")
 IOLoop.current().start()
 
-#current_directory = os.getcwd()
+current_directory = os.getcwd()
 #file_path = os.path.join(current_directory, "field_plot.png")
 #print(file_path)
-
-#Image.open('/Users/emrekaratas/Desktop/Lax/nurc-lax-robot-2023/User_Interface/WebPages/field_plot.png')
+file_path = os.path.join(current_directory, "jpeg-home.jpg")
+print(file_path)
+print("hello"*40)
+Image.open('/Users/emrekaratas/Desktop/Lax/nurc-lax-robot-2023/User_Interface/WebPages/field_plot.png')
