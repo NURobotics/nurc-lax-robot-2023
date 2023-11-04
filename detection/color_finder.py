@@ -2,7 +2,7 @@
 File name :
     color_finder.py
 Purpose :
-    Test different color masks on webcam input
+    Script to test color masking using webcam input.
 Last updated :
     2023-11-04 by Vincent Rimparsurat (vrim@u.northwestern.edu)
 """
