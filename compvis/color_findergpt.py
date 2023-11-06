@@ -25,6 +25,8 @@ cv2.setMouseCallback('Video Stream', get_hsv_range)
 
 hsv_value = None
 hsv_values = []
+highest_hsv = np.array([-256, -256, -256])
+lowest_hsv = np.array([255, 255, 255])
 
 while True:
     ret, frame = cap.read()
@@ -37,19 +39,14 @@ while True:
     hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     if hsv_value is not None:
-        #TODO : Store the max and min value per loop and only check updated values with the new min and max
-        # Check if there is a new hsv value
-        #if hsv_value != hsv_values[-1]:
-            # hsv_values.append(hsv_value)
 
-            # Compute new lower and upper bounds just by checking based on the new hsv points
-            #lower_hsv = np.array([min([lower_hsv[0],hsv_value[0][0]]),min([lower_hsv[1],hsv_value[0][1]]),min([lower_hsv[2],hsv_value[0][2]])])
-            #upper_hsv = np.array
-
-        lower_hsv, upper_hsv = hsv_value
-        # lower_hsv = np.array([min(hsv[0] for hsv in hsv_values), min(hsv[1] for hsv in hsv_values), min(hsv[2] for hsv in hsv_values)])
-        # upper_hsv = np.array([max(hsv[0] for hsv in hsv_values), max(hsv[1] for hsv in hsv_values), max(hsv[2] for hsv in hsv_values)])
-        mask = cv2.inRange(hsv_frame, lower_hsv, upper_hsv)
+        if np.any(np.isin(hsv_value, hsv_values, invert=True)): # inserts a new hsv_value into the array if it is not already in the array
+            hsv_values.append(hsv_value) 
+        
+        lowest_hsv = np.array([min(lowest_hsv[0], hsv_value[0][0]),min(lowest_hsv[1], hsv_value[0][1]), min(lowest_hsv[2], hsv_value[0][2])])
+        highest_hsv = np.array([max(highest_hsv[0], hsv_value[1][0]),max(highest_hsv[1], hsv_value[1][1]), max(highest_hsv[2], hsv_value[1][2])])
+ 
+        mask = cv2.inRange(hsv_frame, lowest_hsv, highest_hsv)
         result = cv2.bitwise_and(frame, frame, mask=mask)
         cv2.imshow('Selected Region', result)
 
