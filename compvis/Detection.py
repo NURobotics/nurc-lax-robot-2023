@@ -1,6 +1,6 @@
 import cv2
 import imutils
-import threading
+import subprocess
 
 class Cam():
     # Inputs the Videocamera number to be used in cv2.VideoCapture()
@@ -34,11 +34,21 @@ class Cam():
             print(self.x, self.y, self.R)
 
     def color_calibration(self):
-        # Complete color calibration for each camera to get the proper range of hsv values for the environment
+        # TODO: Ritvik -> Complete color calibration for each camera to get the proper range of hsv values for the environment
 
         #self.orangeUpper = ...
         #self.orangeLower = ...
         pass  
+
+    def camera_calibration(self):
+        # TODO: Aiden -> implement camera calibration and store in new object
+        # Since this should only need to be completed one time per camera. Have the output saved as a .npy file with designation CAM1 and CAM2. 
+        # We will need to put a label on the cameras as different computers use different paths to the webcams (Unless someone can figure this out. Look into how CV uses indecies as an input to VideoStream function).
+        # Deciding which camera gets what matrix will happen by seeing what camera index gets used for the different cams and applying the correction Matricies to that camera.
+        # See video for more information: https://www.youtube.com/watch?v=uKDAVcSaNZA
+
+
+        pass
     
     def hsv_mask_detec(self):
         # Inputs a frame from self
@@ -54,8 +64,7 @@ class Cam():
 
         # find contours in the mask and initialize the current
 		# (x, y) center of the ball
-        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
-			cv2.CHAIN_APPROX_SIMPLE)
+        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = imutils.grab_contours(cnts)
         center = None
 		# only proceed if at least one contour was found
