@@ -11,10 +11,12 @@ The purpose of this module is to accept video input and return a position to mov
  - Initialize video input source
  - Accept video input
  - Return the ball's position in pixel space
+ - Return the radius of the ball
 
  ### Localize
 
  - Accept the ball's position in pixel space
+ - Accept the radius of the ball
  - Return the ball's position in the base frame
 
  ### Predict
