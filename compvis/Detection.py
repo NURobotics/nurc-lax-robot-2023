@@ -2,7 +2,11 @@ import cv2
 import imutils
 
 class Cam():
-    # Inputs the Videocamera number to be used in cv2.VideoCapture()
+    # Class to initialize webcams and output the position of the ball in the frame. 
+    # Begin by initializing the class with no inputs.
+    # Use find_camera_id to get the find the correct webcam
+
+
     def __init__(self):
         self.cap = None
         self.frame = None
@@ -57,7 +61,6 @@ class Cam():
 
     def get_frame(self):
         # Outputs the frame from the cap object
-        # Eventually include multithreading
         ret,frame = self.cap.read()
         if ret:
             self.frame = frame
@@ -116,7 +119,15 @@ class Cam():
             c = max(cnts, key=cv2.contourArea)
             (self.x,self.y), self.R = cv2.minEnclosingCircle(c)
 
+    def binary_centroid():
+        # TODO: Take masked frame and use a binary thresholding function to create a binary image. (Reduces the image from NxNx3 to NxN)./
+        #   Then compute the centroid based on the values. Should output the x, y position in the frame.
+        # TODO: Complete time testing vs the hsv_mask_detec function
+        # I would expect this function to be faster than finding the contours with an opencv function.
+        pass
+
     def run(self):
+        # Eventually include multithreading with this function
         self.get_frame()
         self.hsv_mask_detec()
         self.show_frame()
