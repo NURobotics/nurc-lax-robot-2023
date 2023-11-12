@@ -1,19 +1,60 @@
 import cv2
 import imutils
-import subprocess
 
 class Cam():
     # Inputs the Videocamera number to be used in cv2.VideoCapture()
-    def __init__(self,N):
-        self.cap = cv2.VideoCapture(N)
+    def __init__(self):
+        self.cap = None
         self.frame = None
         self.orange_upper = (18, 255, 255)
         self.orange_lower = (10, 149, 138)
-        self.window = (f'Cam {N}')
+        self.window = None
+        self.camID = None
         self.x = None 
         self.y = None
         self.R = None
     
+    def find_camera_id(self):
+        # Loop over camera ID's and display their outputs to the user to make sure the you have the correct webcam. Make sure to know what camera is what
+        # If you see the videostream you are looking for press s and the the camID will be saved to the class. If you want to move to the next id press q. 
+        for cam_id in range(10):  # Adjust the range based on the number of cameras you want to check
+            cap = cv2.VideoCapture(cam_id)
+            if not cap.isOpened():
+                print(f"Camera ID {cam_id} is not available.")
+                continue
+
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    print(f"Failed to retrieve frame from Camera ID {cam_id}.")
+                    break
+
+                cv2.imshow(f"Camera ID {cam_id}", frame)
+                key = cv2.waitKey(1) & 0xFF
+                if key == ord('s'):
+                    self.camID = cam_id
+                    self.cap = cap
+                    self.window = (f'Cam {self.camID}')
+                    cv2.destroyAllWindows()
+                    return
+                    
+                if key == ord('q'):
+                    break
+                
+
+
+            cap.release()
+            cv2.destroyAllWindows()
+
+            if self.camID is not None:
+                print(f"Selected Camera ID: {self.camID}")
+                break
+            else:
+                print("No camera selected. Please try again.")
+
+        
+        pass
+
     def get_frame(self):
         # Outputs the frame from the cap object
         # Eventually include multithreading
@@ -24,13 +65,13 @@ class Cam():
             self.frame = None
 
     def show_frame(self):
-        if self.x and self.y and self.R != None:
+        if self.x and self.y and self.R:
             cv2.circle(self.frame, (int(self.x), int(self.y)), int(self.R), (0, 255, 255), 2)
 
         cv2.imshow(self.window,self.frame)
 
     def print_ball_pos(self):
-        if self.x and self.y and self.R != None:
+        if self.x and self.y and self.R:
             print(self.x, self.y, self.R)
 
     def color_calibration(self):
@@ -87,13 +128,18 @@ class Cam():
     
 
 # Test code 
-Detec1 = Cam(0)
+Cam1 = Cam()
+Cam2 = Cam()
+Cam1.find_camera_id()
+Cam2.find_camera_id()
 
 while(1):
-    Detec1.run()
+    Cam1.run()
+    Cam2.run()
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
-        Detec1.release_camera()
+        Cam1.release_camera()
+        Cam2.release_camera()
         break
 cv2.destroyAllWindows()
 
