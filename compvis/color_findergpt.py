@@ -52,7 +52,7 @@ while True:
 
     cv2.imshow('Video Stream', frame)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if cv2.waitKey(1) & 0xFF == ord('x'):
         break
 
 # Release the VideoCapture and close all windows
