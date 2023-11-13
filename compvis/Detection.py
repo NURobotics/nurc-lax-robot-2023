@@ -1,5 +1,7 @@
 import cv2
 import imutils
+import numpy as np
+
 
 class Cam():
     # Class to initialize webcams and output the position of the ball in the frame. 
@@ -10,6 +12,7 @@ class Cam():
     def __init__(self):
         self.cap = None
         self.frame = None
+        self.hsv_value = None
         self.orange_upper = (18, 255, 255)
         self.orange_lower = (10, 149, 138)
         self.window = None
@@ -79,6 +82,52 @@ class Cam():
 
     def color_calibration(self):
         # TODO: Ritvik -> Complete color calibration for each camera to get the proper range of hsv values for the environment
+        def get_hsv_range(event, x, y, flags, param):
+            if event == cv2.EVENT_LBUTTONDOWN:
+                hsv_pixel = hsv_frame[y, x]
+                lower_hsv = np.array([hsv_pixel[0] - 10 , hsv_pixel[1] - 10, hsv_pixel[2] - 10])
+                upper_hsv = np.array([hsv_pixel[0] + 10, hsv_pixel[1] + 10, hsv_pixel[2] + 10])
+                print("Lower HSV Range:", lower_hsv)
+                print("Upper HSV Range:", upper_hsv)
+                self.hsv_value = lower_hsv, upper_hsv
+        
+        hsv_values = []
+        highest_hsv = np.array([0, 0, 0])
+        lowest_hsv = np.array([180, 255, 255])
+
+        cv2.namedWindow('Video Stream')
+        cv2.setMouseCallback('Video Stream', get_hsv_range)
+
+        while True:
+            self.get_frame()
+             # Convert the frame to the HSV color space
+            hsv_frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
+
+
+            if self.hsv_value is not None:
+
+                if np.any(np.isin(self.hsv_value, hsv_values, invert=True)): # inserts a new hsv_value into the array if it is not already in the array
+                    hsv_values.append(self.hsv_value) 
+                
+                lowest_hsv = np.array([min(lowest_hsv[0], self.hsv_value[0][0]),min(lowest_hsv[1], self.hsv_value[0][1]), min(lowest_hsv[2], self.hsv_value[0][2])])
+                highest_hsv = np.array([max(highest_hsv[0], self.hsv_value[1][0]),max(highest_hsv[1], self.hsv_value[1][1]), max(highest_hsv[2], self.hsv_value[1][2])])
+
+                mask = cv2.inRange(hsv_frame, lowest_hsv, highest_hsv)
+                result = cv2.bitwise_and(self.frame, self.frame, mask=mask)
+                cv2.imshow('Selected Region', result)
+                print('arrived')
+
+            cv2.imshow('Video Stream', self.frame)
+
+            if cv2.waitKey(1) & 0xFF == ord('x'):
+                print(f'Orange Lower: {lowest_hsv}')
+                print(f'Orange Upper: {highest_hsv}')
+                self.orange_lower = lowest_hsv
+                self.orage_upper = highest_hsv
+                break
+
+        # Release the VideoCapture and close all windows
+        cv2.destroyAllWindows()
 
         #self.orangeUpper = ...
         #self.orangeLower = ...
@@ -140,17 +189,14 @@ class Cam():
 
 # Test code 
 Cam1 = Cam()
-Cam2 = Cam()
 Cam1.find_camera_id()
-Cam2.find_camera_id()
+Cam1.color_calibration()
 
 while(1):
     Cam1.run()
-    Cam2.run()
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         Cam1.release_camera()
-        Cam2.release_camera()
         break
 cv2.destroyAllWindows()
 
