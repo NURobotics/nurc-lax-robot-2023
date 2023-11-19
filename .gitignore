@@ -2,17 +2,13 @@
 *.avi
 *.weights
 yolo-balls/*
-.vs/*
+.vs/
+.idea/
 python_gui/.vs/*
 python_gui/code/.vs/*
 *.pyc
 *.suo
-.DS_Store
+.DS_Store/
 
-**\.vs\*
 *.pb
 *.pbtxt
-User_Interface/sean_webtest/.vs/ProjectSettings.json
-User_Interface/sean_webtest/.vs/slnx.sqlite
-.DS_Store
-User_Interface/.DS_Store

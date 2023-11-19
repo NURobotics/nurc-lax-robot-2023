@@ -7,6 +7,7 @@ import pickle
 import os
 
 
+
 class Cam():
     # Class to initialize webcams and output the position of the ball in the frame. 
     # Begin by initializing the class with no inputs.
@@ -387,6 +388,7 @@ class Cam():
             mean_error += error
 
         print( "total error: {}".format(mean_error/len(objpoints)) )
+
 
         pass
     
