@@ -417,18 +417,50 @@ class Cam():
             c = max(cnts, key=cv2.contourArea)
             (self.x,self.y), self.R = cv2.minEnclosingCircle(c)
 
-    def binary_centroid():
-        # TODO: Take masked frame and use a binary thresholding function to create a binary image. (Reduces the image from NxNx3 to NxN)./
+    def binary_centroid(self):
+        # Take masked frame and use a binary thresholding function to create a binary image. (Reduces the image from NxNx3 to NxN)./
         #   Then compute the centroid based on the values. Should output the x, y position in the frame.
         # TODO: Complete time testing vs the hsv_mask_detec function
         # I would expect this function to be faster than finding the contours with an opencv function.
-        pass
+        
+        # Code borrowed from hsv_mask_detec to get the mask
+        if not self.frame.all:
+            self.x, self.y = None, None
+        hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
+        mask = cv2.inRange(hsv, self.orange_lower, self.orange_upper)
+
+        # Compute the binary threshold of the mask
+        ret, thresh = cv2.threshold(mask, 200, 255, cv2.THRESH_BINARY)
+        # If the threshold function fails, return early
+        if not ret:
+            self.x, self.y = None, None
+            return
+        
+        # Calculate the indices of the coordinates where the frame is set to 1
+        y_coords, x_coords = np.where(thresh)
+
+        # Put them into a numpy array
+        positions = np.array([np.median(x_coords), np.median(y_coords)])
+
+        # If there are no pixels that are set to 1, then return early
+        if np.any(np.isnan(positions)):
+            self.x, self.y = None, None
+            return
+
+        # Finally, set self.x and self.y to the computed positions
+        self.x, self.y = positions[0], positions[1]
+        # Function doesn't detect radius; can change to whatever
+        self.R = 10
+
+        # TODO: implement background subtraction to only detect moving objects
+
 
     def run(self):
         # TODO: Eventually include multithreading with this function.  Will need to have the while loop included
         t0 = time.time()
         self.get_frame()
-        self.hsv_mask_detec()
+        # self.hsv_mask_detec()
+        self.binary_centroid()
         self.show_frame()
         self.fps = 1/(time.time() - t0)
 
