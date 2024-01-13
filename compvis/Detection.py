@@ -5,7 +5,7 @@ import numpy as np
 import glob
 import pickle
 import os
-
+from linetimer import CodeTimer
 
 
 class Cam():
@@ -14,14 +14,14 @@ class Cam():
     # Use find_camera_id to get the find the correct webcam
 
 
-    def __init__(self):
+    def __init__(self, camID = None):
         self.cap = None
         self.frame = None
         self.hsv_value = None
         self.orange_upper = np.array([18, 255, 255])
         self.orange_lower = np.array([10, 149, 138])
         self.window = None
-        self.camID = None
+        self.camID = camID
         self.x = None 
         self.y = None
         self.R = None
@@ -38,8 +38,8 @@ class Cam():
 
 
 
-        for cam_id in range(5):  # Adjust the range based on the number of cameras you want to check
-            cap = cv2.VideoCapture(cam_id)
+        for cam_id in range(2):  # Adjust the range based on the number of cameras you want to check
+            cap = cv2.VideoCapture(cam_id, cv2.CAP_DSHOW)
             if not cap.isOpened():
                 print(f"Camera ID {cam_id} is not available.")
                 continue
@@ -74,7 +74,46 @@ class Cam():
             cv2.destroyAllWindows()
         
         pass
+    
+    
+    def set_camera_id(self):
+        cam_id = self.camID
+        cap = cv2.VideoCapture(self.camID, cv2.CAP_DSHOW)
+        if not cap.isOpened():
+            print(f"Camera ID {cam_id} is not available.")
+        
+        print("Press s to use displayed camera.\nPress q to skip to the next camera.")
 
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                print(f"Failed to retrieve frame from Camera ID {cam_id}.")
+                break
+
+            cv2.imshow(f"Camera ID {cam_id}", frame)
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('s'):
+                self.camID = cam_id
+                self.cap = cap
+                self.window = (f'Cam {self.camID}')
+                self.H = np.shape(frame)[0]
+                self.W = np.shape(frame)[1]
+                print(f'--> Camera Index: [{self.camID}] saved!\n')
+                cv2.destroyAllWindows()
+                return
+                
+            if key == ord('q'):
+                print("--> Camera skipped!")
+                break
+            
+
+
+        cap.release()
+        cv2.destroyAllWindows()
+        
+        pass
+    
+        
     def get_frame(self):
         # Outputs the frame from the cap object
         ret,frame = self.cap.read()
@@ -282,7 +321,7 @@ class Cam():
         stereoMapR = cv2.initUndistortRectifyMap(newCameraMatrixR, distR, rectR, projMatrixR, grayR.shape[::-1], cv2.CV_16SC2)
 
         print("Saving parameters!")
-        cv_file = cv2.FileStorage('stereoMap.xml', cv.FILE_STORAGE_WRITE)
+        cv_file = cv2.FileStorage('stereoMap.xml', cv2.FILE_STORAGE_WRITE)
 
         cv_file.write('stereoMapL_x',stereoMapL[0])
         cv_file.write('stereoMapL_y',stereoMapL[1])
@@ -407,6 +446,7 @@ class Cam():
         # find contours in the mask and initialize the current
 		# (x, y) center of the ball
         cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        print(cnts)
         cnts = imutils.grab_contours(cnts)
         center = None
 		# only proceed if at least one contour was found
@@ -446,7 +486,6 @@ class Cam():
         if np.any(np.isnan(positions)):
             self.x, self.y = None, None
             return
-
         # Finally, set self.x and self.y to the computed positions
         self.x, self.y = positions[0], positions[1]
         # Function doesn't detect radius; can change to whatever
@@ -454,49 +493,91 @@ class Cam():
 
         # TODO: implement background subtraction to only detect moving objects
 
+    
+        
 
     def run(self):
         # TODO: Eventually include multithreading with this function.  Will need to have the while loop included
         t0 = time.time()
-        self.get_frame()
+        with gf:
+            self.get_frame()
+        gf_times.append(gf.took)
         # self.hsv_mask_detec()
-        self.binary_centroid()
-        self.show_frame()
+        with bc:
+            self.binary_centroid()
+        bc_times.append(bc.took)
+        with sf:    
+            self.show_frame()
+        sf_times.append(sf.took)
         self.fps = 1/(time.time() - t0)
 
     def release_camera(self):
         self.cap.release()
         print(f'{self.window} released!')
 
+def ray_backtracking(Cam1, Cam2):
+    with ray_timer:
+        cam_matrix = np.array([[506.84856584,   0,         319.76019864],
+                                [0,         506.82585053,  238.71317098],
+                                [0,           0,           1,        ]]) # hard coded from camera calibration
+        if not (Cam1.x and Cam1.y and Cam2.x and Cam2.y):
+            return
+        Ki_1 = np.linalg.inv(cam_matrix)
+        ray1 = Ki_1.dot([Cam1.x, Cam1.y, 1.0])
+        Ki_2 = np.linalg.inv(cam_matrix)
+        ray2 = Ki_2.dot([Cam2.x, Cam2.y, 1.0])
+        
+        cos_angle = ray1.dot(ray2) / (np.linalg.norm(ray1) * np.linalg.norm(ray2))
+        angle_radians = np.arccos(cos_angle)
+        angle_degrees = angle_radians * 180 / 3.141592
+    ray_times.append(ray_timer.took)
+    #print(angle_radians)
+    #print(angle_degrees)
+
     
 
 # Test code 
-Cam1 = Cam()
-Cam2 = Cam()
-try:
-    Cam1.find_camera_id()
-except:
-    Cam1.release_camera()
-
+Cam1 = Cam(camID = 1)
+Cam2 = Cam(camID = 2)
+# try:
+#     Cam1.find_camera_id()
+# except:
+#     Cam1.release_camera()
+Cam1.set_camera_id()
 
 Cam1.color_calibration()
 
-try:
-    Cam2.find_camera_id()
-except:
-    Cam2.release_camera()
+# try:
+#     Cam2.find_camera_id()
+# except:
+#     Cam2.release_camera()
+Cam2.set_camera_id()
 
 Cam2.color_calibration()
-
+gf_times, bc_times, sf_times,ray_times, loop_times = [], [], [], [], []
+gf = CodeTimer("Get Frame", silent=True)
+bc = CodeTimer("Binary Centroid", silent=True)
+sf = CodeTimer("Show Frame", silent=True)
+ray_timer = CodeTimer("Ray Timer", silent = True)
+loop_timer = CodeTimer("Loop Timer", silent = True)
 print("Press q to release cameras and exit.\n")
-while(1):
-    Cam1.run()
-    Cam2.run()
-
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        Cam1.release_camera()
-        Cam2.release_camera()
-        break
+while True:
+    with loop_timer:
+        Cam1.run()
+        Cam2.run()
+        
+        ray_timer = CodeTimer()
+        ray_backtracking(Cam1, Cam2) 
+        
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            Cam1.release_camera()
+            Cam2.release_camera()
+            break
+    loop_times.append(loop_timer.took)
+        
 cv2.destroyAllWindows()
-
-
+print(f"The average time taken to fully loop was {round(np.average(loop_times[3:-3]), 5)} ms")
+print(f"The average time taken to get frame was {round(np.average(gf_times[3:-3]), 5)} ms")
+print(f"The average time taken to do binary centroid was {round(np.average(bc_times[3:-3]), 5)} ms")
+print(f"The average time taken to show frame was {round(np.average(sf_times[3:-3]), 5)} ms")
+print(f"The average time taken to calculate rays was {round(np.average(ray_times[3:-3]), 5)} ms")
