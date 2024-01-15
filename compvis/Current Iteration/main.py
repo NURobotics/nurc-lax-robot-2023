@@ -1,10 +1,17 @@
 import cv2, time
 import numpy as np
 from rays import ray_backtracking
-from camera_identification import camera_instantiator
+from camera_setup import camera_instantiator, find_camera_ids
 from camera_class import timers
 
-def main(cam_ids):
+
+""" 
+Cam_ids is an array with which the user specifies which cameras are to be used... 
+eg: cam_ids = [0] uses laptop webcam -- cam_ids = [1,2] uses 2 external cameras
+If given none it will default to finding the cam_ids function
+"""
+def main(cam_ids = None):
+    
     cameras = camera_instantiator(cam_ids)
     print("Press q to release cameras and exit.\n")
     
@@ -38,7 +45,7 @@ def main(cam_ids):
 
         
 if __name__ == "__main__":
-    main([0])
+    main()
     
     
     

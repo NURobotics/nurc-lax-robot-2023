@@ -3,6 +3,7 @@ import cv2
 
 def get_frame(Camera):
     # Outputs the frame from the cap object
+    print(Camera.cap)
     ret,frame = Camera.cap.read()
     if ret:
         Camera.frame = frame
