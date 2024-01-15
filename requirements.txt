@@ -3,6 +3,7 @@ cycler==0.12.1
 fonttools==4.43.1
 imutils==0.5.4
 kiwisolver==1.4.5
+linetimer==0.1.5
 matplotlib==3.8.0
 modern-robotics==1.1.1
 numpy==1.26.0
