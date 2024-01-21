@@ -4,12 +4,6 @@ import glob
 import pickle
 
 def camera_calibration():
-    # TODO: Aiden -> implement camera calibration and store in new object
-    # Since this should only need to be completed one time per camera. Have the output saved as a .npy file with designation CAM1 and CAM2. 
-    # We will need to put a label on the cameras as different computers use different paths to the webcams (Unless someone can figure this out. Look into how CV uses indecies as an input to VideoStream function).
-    # Deciding which camera gets what matrix will happen by seeing what camera index gets used for the different cams and applying the correction Matricies to that camera.
-    # See video for more information: https://www.youtube.com/watch?v=uKDAVcSaNZA
-    ################ FIND CHESSBOARD CORNERS - OBJECT POINTS AND IMAGE POINTS #############################
 
     chessboardSize = (8,5)
     frameSize = (640,480)

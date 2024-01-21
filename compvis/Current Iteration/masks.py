@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from frames import get_frame
 
 """ 
 1/14/24 Need to fix resetting mask -- current implementation does not support
@@ -82,7 +81,7 @@ def get_hsv_ranges(camera):
         "Click on the Video Stream frame until the mask looks correct.\nPress s to save hsv bounds.\nPress r to reset mask.\nPress q to exit"
     )
     while True:
-        get_frame(camera)
+        camera.get_frame()
         # Convert the frame to the HSV color space
         hsv_frame = cv2.cvtColor(camera.frame, cv2.COLOR_BGR2HSV)
 
@@ -139,7 +138,7 @@ def get_hsv_ranges(camera):
     pass
 
 
-# I believe that this is unused legacy code but it falls into this bin
+# I believe that this is unused legacy code but it falls into this bin -- Aiden 1/21/24
 #
 # def hsv_mask_detec(self):
 #         # Inputs a frame from self

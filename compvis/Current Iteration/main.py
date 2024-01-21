@@ -1,9 +1,7 @@
 import cv2, time
 import numpy as np
-from rays import ray_backtracking
-from camera_setup import camera_instantiator, find_camera_ids
-from camera import timers
-
+from camera import timers, camera_instantiator
+from triangulation import LSLocalizer
 
 """ 
 Cam_ids is an array with which the user specifies which cameras are to be used... 
@@ -12,22 +10,31 @@ If given none it will default to finding the cam_ids function
 """
 
 
-def main(cam_ids=None):
+def main(camera_transforms, cam_ids=None):
     cameras = camera_instantiator(cam_ids)
     print("Press q to release cameras and exit.\n")
 
     while True:
         with timers.loop:
+            rays = {} # dict to make debugging easier
             for camera in cameras.values():
                 camera.run()
-
-            # Check if the correct number of cameras have been instantiated to use ray_backtracking, if so proceed
-            camera_list = list(cameras.values())
-            if len(camera_list) == 2:
-                with timers.ray:
-                    rays = ray_backtracking(camera_list[0], camera_list[1])
-                    # TODO Implement triangulation based upon the rays returned
-                timers.ray_times.append(timers.ray.took)
+                if camera.located():
+                    rays[camera] = camera.get_ray()
+            
+            if len(rays.values()) != 2:
+                if cv2.waitKey(1) & 0xFF == ord("q"):
+                    for camera in cameras.values():
+                        camera.release_camera()
+                    break
+                continue 
+                
+            with timers.ray:
+                #TODO need to correctly implement camera transforms in main
+                lsl = LSLocalizer(camera_transforms)
+                predicted_point = lsl.predict(rays.values())
+                print(f"Predicted point: {predicted_point}")
+            timers.ray_times.append(timers.ray.took)
 
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 for camera in cameras.values():
@@ -58,4 +65,23 @@ def main(cam_ids=None):
 
 
 if __name__ == "__main__":
-    main()
+    T_cam1 = np.array(
+        [
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+        ]
+    )
+
+    # second camera rotated pi/2 about Z at (1, 1, 0)
+    T_cam2 = np.array(
+        [
+            [0, -1, 0, 1],
+            [1, 0, 0, 1],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+        ]
+    )
+    camera_transforms = [T_cam1, T_cam2]
+    main(camera_transforms, [0])
