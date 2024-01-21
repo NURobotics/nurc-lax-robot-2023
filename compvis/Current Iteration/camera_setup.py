@@ -62,8 +62,13 @@ def camera_instantiator(cam_ids):
 
     for cam_id in cam_ids:
         cam_name = f"Cam{cam_id}"
-        cameras[cam_name] = Cam(camID=cam_id)
-        set_camera_id(cameras[cam_name])
+
+        # cap = None fix
+        test_cam = Cam(camID=cam_id)
+        set_camera_id(test_cam)
+
+        if test_cam.cap:
+            cameras[cam_name] = test_cam
 
     for camera in cameras.values():
         print(camera)
