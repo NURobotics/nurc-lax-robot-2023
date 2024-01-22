@@ -1,6 +1,7 @@
 import cv2, time
 import numpy as np
-from camera import timers, camera_instantiator
+from camera import camera_instantiator
+from timers import timers
 from triangulation import LSLocalizer
 
 """ 
@@ -15,53 +16,25 @@ def main(camera_transforms, cam_ids=None):
     print("Press q to release cameras and exit.\n")
 
     while True:
-        with timers.loop:
-            rays = {} # dict to make debugging easier
-            for camera in cameras.values():
-                camera.run()
-                if camera.located():
-                    rays[camera] = camera.get_ray()
-            
-            if len(rays.values()) != 2:
-                if cv2.waitKey(1) & 0xFF == ord("q"):
-                    for camera in cameras.values():
-                        camera.release_camera()
-                    break
-                continue 
-                
-            with timers.ray:
-                #TODO need to correctly implement camera transforms in main
-                lsl = LSLocalizer(camera_transforms)
-                predicted_point = lsl.predict(rays.values())
-                print(f"Predicted point: {predicted_point}")
-            timers.ray_times.append(timers.ray.took)
-
+        with timers.timers["Loop Timer"]:
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 for camera in cameras.values():
                     camera.release_camera()
                 break
+            
+            rays = {camera: camera.run() for camera in cameras.values() if camera.ball_located}
+                    
+            if rays:
+                #TODO need to correctly implement camera transforms in main
+                lsl = LSLocalizer(camera_transforms)
+                predicted_point = lsl.predict(rays.values())
+                print(f"Predicted point: {predicted_point}")
 
-        timers.loop_times.append(timers.loop.took)
+        timers.record_time("Loop Timer")
 
     cv2.destroyAllWindows()
+    timers.display_averages()
 
-    print(
-        f"The average time taken to fully loop was {round(np.average(timers.loop_times), 5)} ms"
-    )
-    print(
-        f"The average time taken to get frame was {round(np.average(timers.gf_times), 5)} ms"
-    )
-    print(
-        f"The average time taken to do binary centroid was {round(np.average(timers.bc_times), 5)} ms"
-    )
-    print(
-        f"The average time taken to show frame was {round(np.average(timers.sf_times), 5)} ms"
-    )
-    print(
-        f"The average time taken to calculate rays was {round(np.average(timers.ray_times), 5)} ms"
-        if timers.ray_times
-        else "No rays calculated"
-    )
 
 
 if __name__ == "__main__":
@@ -84,4 +57,4 @@ if __name__ == "__main__":
         ]
     )
     camera_transforms = [T_cam1, T_cam2]
-    main(camera_transforms, [0])
+    main(camera_transforms)

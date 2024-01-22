@@ -1,5 +1,5 @@
 import numpy as np
-
+from timers import timers
 
 class LSLocalizer:
     """Takes multiple rays to predict a position using a least squares method.
@@ -19,8 +19,10 @@ class LSLocalizer:
         self.camera_transforms = np.array(camera_transforms)
 
     def predict(self, ray_vectors, weights = None):
-        if weights is None:
-            weights = np.ones(len(ray_vectors))
+        with timers.timers["LSL Timer"]:
+            if weights is None:
+                weights = np.ones(len(ray_vectors))
+        timers.record_time("LSL Timer")
         
         transformed_rays = self.ray_transforms(ray_vectors)
         ray_points = self.camera_transforms[:, :3, 3]
@@ -53,7 +55,6 @@ class LSLocalizer:
 
         if not len(ray_directions) == n or not len(weights) == n:
             print("Size of ray_points and ray_directions do not match")
-            
             print(f"ray directions {ray_directions}, ray points {ray_points}")
             return np.zeros(3)
 

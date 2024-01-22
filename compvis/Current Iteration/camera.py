@@ -1,29 +1,8 @@
 import cv2 as cv
 import time
 import numpy as np
-from linetimer import CodeTimer
 from masks import binary_centroid, get_hsv_ranges
-
-
-class Timers:
-    """
-    Timer class to measure execution times of various functions.
-    """
-
-    def __init__(self):
-        self.gf = CodeTimer("Get Frame", silent=True)
-        self.bc = CodeTimer("Binary Centroid", silent=True)
-        self.sf = CodeTimer("Show Frame", silent=True)
-        self.loop = CodeTimer("Loop Timer", silent=True)
-        self.ray = CodeTimer("Ray Timer", silent=True)
-        self.gf_times = []
-        self.bc_times = []
-        self.sf_times = []
-        self.loop_times = []
-        self.ray_times = []
-
-
-timers = Timers()
+from timers import timers
 
 
 class Cam:
@@ -91,7 +70,7 @@ class Cam:
         self.frame = frame
         return frame
     
-    def located(self):
+    def ball_located(self):
         return (self.x and self.y)
     
     def show_circled_frame(self):
@@ -156,19 +135,22 @@ class Cam:
 
     def run(self):
         t0 = time.time()
-        with timers.gf:
+        with timers.timers["Get Frame"]:
             self.get_frame()
-        timers.gf_times.append(timers.gf.took)
+        timers.record_time("Get Frame")
 
-        with timers.bc:
+        with timers.timers["Binary Centroid"]:
             binary_centroid(self)
-        timers.bc_times.append(timers.bc.took)
+        timers.record_time("Binary Centroid")
 
-        with timers.sf:
+        with timers.timers["Show Frame"]:
             self.show_circled_frame()
-        timers.sf_times.append(timers.sf.took)
+        timers.record_time("Show Frame")
 
         self.fps = 1 / (time.time() - t0)
+
+        return self.get_ray()
+
         
 def find_camera_ids():
     ids = []
@@ -214,4 +196,3 @@ if __name__ == "__main__":
                 for camera in cameras.values():
                     camera.release_camera()
                 break
-        
