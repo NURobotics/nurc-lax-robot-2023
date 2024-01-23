@@ -42,12 +42,14 @@ class RLS:
 
     def fit(self, X, y):
         """
-        Fit a model to X,y.
+        Fit a model to X, y.
         X and y are numpy arrays.
-        Individual observations in X should have a prepended 1 for constant coefficient.
+        Individual observations in X should have a prepended 1 for the constant coefficient.
         """
-        for i in range(len(X)):
-            x = np.transpose(np.matrix(X[i]))
+        for i, point in enumerate(X):
+            x = np.matrix(np.ones((1, 4)))
+            x[0, 1:4] = point  # Copy the coordinates of the 3D point to x
+            x = np.transpose(x)
             self.add_obs(x, y[i])
 
     def get_error(self):
@@ -62,7 +64,13 @@ class RLS:
         """
         Predict the value of observation x. x should be a numpy matrix (col vector)
         """
-        return float(self.w.T * x)
+        x = x[:, np.newaxis]
+        print(f"Shape of self.w: {self.w.shape}, Shape of x: {x.shape}")
+        print(self.w.T)
+        print(x)
+
+        return float(self.w.T @ x)  # changed * to @ because
+
 
 def regression_test():
     # Predicting a quadratic function
@@ -76,7 +84,7 @@ def regression_test():
     y = np.array([f(i) for i in range(test_size)])
     noisy_y = y + noise
     lam = 0.98
-    LS = RLS(3, lam, 1)
+    LS = RLS(4, lam, 1)  # adjusted to 4 bc 3D plus constanst
     # Not using the RLS.fit function because I want to remember all the predicted values
     pred_x = []
     pred_y = []
@@ -97,6 +105,7 @@ def regression_test():
     plt.plot(pred_x, y - pred_y)
     plt.title("Error as more points are added")
     plt.show()
+
 
 if __name__ == "__main__":
     regression_test()

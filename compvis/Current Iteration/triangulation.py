@@ -1,6 +1,7 @@
 import numpy as np
 from timers import timers
 
+
 class LSLocalizer:
     """Takes multiple rays to predict a position using a least squares method.
 
@@ -18,14 +19,15 @@ class LSLocalizer:
     def __init__(self, camera_transforms):
         self.camera_transforms = np.array(camera_transforms)
 
-    def predict(self, ray_vectors, weights = None):
-        with timers.timers["LSL Timer"]:
+    def predict(self, ray_vectors, weights=None):
+        with timers.timers["LSLocalizer"]:
             if weights is None:
                 weights = np.ones(len(ray_vectors))
-        timers.record_time("LSL Timer")
-        
-        transformed_rays = self.ray_transforms(ray_vectors)
-        ray_points = self.camera_transforms[:, :3, 3]
+
+            transformed_rays = self.ray_transforms(ray_vectors)
+            ray_points = self.camera_transforms[:, :3, 3]
+        timers.record_time("LSLocalizer")
+
         return self.find_nearest_point(ray_points, transformed_rays, weights)
 
     def ray_transforms(self, ray_vectors):
@@ -34,9 +36,9 @@ class LSLocalizer:
             transform = self.camera_transforms[i]
             transform_origin = transform[:, 3]
 
-            ray = transform @ ray
+            ray = transform @ np.append(ray, 1)
             ray -= transform_origin
-            
+
             transformed_rays.append(ray[:3])
 
         return np.array(transformed_rays)
@@ -60,6 +62,7 @@ class LSLocalizer:
 
         if weights is None:
             weights = np.ones(n)
+        weights = np.array(weights)
 
         direction_magnitudes = np.linalg.norm(ray_directions, axis=1)
         ray_directions = weights[:, None] * (

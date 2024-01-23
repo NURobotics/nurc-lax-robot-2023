@@ -40,10 +40,9 @@ class Cam:
         # Height and Width of the frame in pixels
         self.W = None
         self.H = None
-        self.cam_matrix = np.array([[506.84856584, 0, 319.76019864],
-                                    [0, 506.82585053, 238.71317098],
-                                    [0, 0, 1],])  # hard coded from camera calibration
-
+        self.cam_matrix = np.array(
+            [[500, 0, 320], [0, 500, 240], [0, 0, 1]]
+        )  # hard coded from camera calibration
 
     def release_camera(self):
         self.cap.release()
@@ -64,15 +63,15 @@ class Cam:
 
     def set_cap(self, cap):
         self.cap = cap
-        
+
     def get_frame(self):
         _, frame = self.cap.read()
         self.frame = frame
         return frame
-    
+
     def ball_located(self):
-        return (self.x and self.y)
-    
+        return self.x and self.y
+
     def show_circled_frame(self):
         if self.x and self.y and self.R:
             cv.circle(
@@ -89,18 +88,18 @@ class Cam:
             )
 
         cv.imshow(self.window, self.frame)
-        
+
     def get_ray(self):
         if not (self.x and self.y):
             pass
-        Ki_1 = np.linalg.inv(self.cam_matrix)
-        ray1 = Ki_1.dot([self.x, self.y, 1.0])
-        ray1_norm = np.linalg.norm(ray1)
-        
+        Ki = np.linalg.inv(self.cam_matrix)
+        ray = Ki @ np.array([self.x, self.y, 1.0])
+        ray_norm = ray / np.linalg.norm(ray)
+
         # cos_angle = ray1.dot(ray2) / (np.linalg.norm(ray1) * np.linalg.norm(ray2))
         # angle_radians = np.arccos(cos_angle)
         # angle_degrees = angle_radians * 180 / 3.141592
-        return np.append((ray1 / ray1_norm), 1) # unit vector
+        return np.array([ray_norm[0], ray_norm[2], -ray_norm[1]])  # unit vector
 
     def set_camera_id(self):
         cap = cv.VideoCapture(self.camID, cv.CAP_DSHOW)
@@ -116,7 +115,7 @@ class Cam:
                 break
 
             cv.imshow(f"camera ID {self.camID}", frame)
-            key = cv.waitKey(1) & 0xFF
+            key = cv.waitKey(1)
             if key == ord("s"):
                 self.cap = cap
                 self.window = f"Cam {self.camID}"
@@ -151,10 +150,12 @@ class Cam:
 
         return self.get_ray()
 
-        
+
 def find_camera_ids():
     ids = []
-    for cam_id in range(3):  # Adjust the range based on the number of cameras you want to check
+    for cam_id in range(
+        3
+    ):  # Adjust the range based on the number of cameras you want to check
         cap = cv.VideoCapture(cam_id, cv.CAP_DSHOW)
         ret, _ = cap.read()
         if ret:
@@ -162,19 +163,19 @@ def find_camera_ids():
     return ids
 
 
-def camera_instantiator(cam_ids = None):
+def camera_instantiator(cam_ids=None):
     # quick function to set up each camera
     cameras = {}
     if cam_ids is None:
         cam_ids = find_camera_ids()
-                
+
     for cam_id in cam_ids:
         cam_name = f"Cam{cam_id}"
 
         # cap = None fix
         test_cam = Cam(camID=cam_id)
         test_cam.set_camera_id()
-        
+
         if test_cam.cap:
             cameras[cam_name] = test_cam
 
@@ -183,16 +184,19 @@ def camera_instantiator(cam_ids = None):
 
     return cameras
 
+
 if __name__ == "__main__":
     cameras = camera_instantiator()
     verbose = True
     while True:
         for camera in cameras.values():
             if verbose:
-                print(f"Does Cam{camera.get_id()} currently have a set id? {camera.has_id()}")
+                print(
+                    f"Does Cam{camera.get_id()} currently have a set id? {camera.has_id()}"
+                )
                 verbose = False
             camera.run()
-        if cv.waitKey(1) & 0xFF == ord("q"):
-                for camera in cameras.values():
-                    camera.release_camera()
-                break
+        if cv.waitKey(1) == ord("q"):
+            for camera in cameras.values():
+                camera.release_camera()
+            break
