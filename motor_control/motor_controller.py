@@ -1,6 +1,7 @@
 
 from PyRoboteq.roboteq_handler import RoboteqHandler
 from PyRoboteq import roboteq_commands as cmds
+import time
 
 class Controller(RoboteqHandler):
     '''A simple structure to describe the motor controller at a higher level
@@ -8,8 +9,10 @@ class Controller(RoboteqHandler):
 
     This class includes:
     - Member data describing current params being read from the Roboteq
+    - Constant data about the goal
     - Functions to handle PID control
     - Functions to convert from real-world space to motor space
+    - 
     '''
 
     def __init__(self, exit_on_interrupt = False, debug_mode = False):
@@ -17,6 +20,16 @@ class Controller(RoboteqHandler):
         self.pulley_rad = 0.012 #mm; doesn't take into account belt thickness
         self.encoder_cpr = 1250
         self.MAGIC_SCALAR = 1.73 #to adjust conversion from encoder counts to real-world posn
+        self.dwell = 0.1 # Wait for sometime after a command is sent
+
+        # Goal constants 
+        self.goal_height = 1.92 # meters
+        self.goal_width = 2.75 # meters
+        self.end_effector_height = 0.331 # meters
+        self.end_effector_width = 0.466 # meters
+
+        self.safty_distance = 0.05 # meters // 5 cm safty factor ie border
+
 
     def read_curr_state(self):
         '''Read all relevant values from the Roboteq at once. Depending on baud rate,
@@ -108,6 +121,31 @@ class Controller(RoboteqHandler):
         self.read_value(cmds.READ_KP, 2)
         self.read_value(cmds.READ_KI, 2)
         self.read_value(cmds.READ_KD, 2)
+
+    def initialization(self):
+        # Set the (0,0) position of the goal in the top left corner of the goal
+        # Set the motor mode to open loop 
+        motor_mode = 0
+        self.send_command(cmds.MOTOR_MODE, 1, motor_mode)
+        self.send_command(cmds.MOTOR_MODE, 2, motor_mode)
+        time.sleep(self.dwell)
+        # Wait until a button is pressed to set the encoders 0 positions
+        user_input = input("Move the end effector to the top right position of the robot.\nPress any key to continue")
+        self.send_command(cmds.SET_ENC_COUNTER, 1, 0) #first motor; set to zero
+        self.send_command(cmds.SET_ENC_COUNTER, 2, 0) #first motor; set to zero
+        time.sleep(self.dwell)
+        print("Home has been set!")
+
+    def safety_protocol(self,commanded_point):
+        # The commanded point (x,y) is run through this function. It will check with the bounds of the goal to ensure that it will not come into contact with the goal frame.
+
+        # The (0,0) position is the top center of the goal frame
+        # Create the bounds on the real world positions
+        horizontal_bounds = (-self.goal_width/2 + self.end_effector_width + self.safty_distance, self.goal_width/2 - self.end_effector_width - self.safty_distance)
+        vertical_bounds = (0 - self.end_effector_height - self.safty_distance, - self.goal_height + self.end_effector_height + self.safty_distance)
+        # First off check if the 
+        pass
+
 
     #init_coords = (0,0) #change based on actual posns read by encoders
     #deltax, deltay = [coord[i] - init_coords[i] for i in range(len(coord))]
